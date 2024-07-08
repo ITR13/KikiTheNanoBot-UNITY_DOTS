@@ -12,6 +12,7 @@ public partial class RenderSystemGroup : ComponentSystemGroup
 {
 }
 
+[UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(ControlSystemGroup))]
 [UpdateBefore(typeof(RenderSystemGroup))]
 public partial class EndTickSystemGroup : ComponentSystemGroup

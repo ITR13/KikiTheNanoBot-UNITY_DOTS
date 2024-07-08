@@ -2,10 +2,12 @@ using Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 class SingletonAuthoring : MonoBehaviour
 {
     public int3 RoomDimensions;
+    public InputActionAsset InputActionAsset;
 }
 
 class SingletonAuthoringBaker : Baker<SingletonAuthoring>
@@ -22,5 +24,14 @@ class SingletonAuthoringBaker : Baker<SingletonAuthoring>
         );
 
         AddComponent<MovementTick>(entity);
+
+
+        AddComponent(
+            entity,
+            new InputActionsHolder
+            {
+                InputActions = authoring.InputActionAsset,
+            }
+        );
     }
 }

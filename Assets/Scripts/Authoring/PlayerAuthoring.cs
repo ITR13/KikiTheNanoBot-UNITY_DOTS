@@ -14,20 +14,24 @@ class PlayerAuthoringBaker : Baker<PlayerAuthoring>
         var entity = GetEntity(TransformUsageFlags.Dynamic);
         AddComponent<Player>(entity);
 
-        var knots = AddBuffer<Knot>(entity);
-
-        var t = 0f;
-        for(var i = 0; i<10; i++)
-        {
-            knots.Add(
-                new Knot
-                {
-                    Position = new float3(0, 0, i),
-                    Rotation = Quaternion.identity,
-                    Time = t,
-                }
-            );
-            t += i;
-        }
+        var climbKnots = AddBuffer<ClimbKnot>(entity);
+        climbKnots.Add(
+            new ClimbKnot
+            {
+                Position = new float3(0, 0, 0),
+                Rotation = Quaternion.identity,
+                Time = 0,
+            }
+        );
+        
+        
+        var rotateKnots = AddBuffer<RotateKnot>(entity);
+        rotateKnots.Add(
+            new RotateKnot()
+            {
+                Rotation = Quaternion.identity,
+                Time = 0,
+            }
+        );
     }
 }

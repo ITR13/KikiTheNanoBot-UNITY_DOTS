@@ -166,6 +166,7 @@ MonoBehaviour:
     x: 10
     y: 5
     z: 10
+  InputActionAsset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!1 &637123516
 GameObject:
   m_ObjectHideFlags: 0

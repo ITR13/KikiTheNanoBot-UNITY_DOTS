@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Data
 {
-    public struct Knot : IBufferElementData
+    public struct ClimbKnot : IBufferElementData
     {
         public float Time;
         public float3 Position;

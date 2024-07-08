@@ -26,12 +26,12 @@ partial struct DebugRendererSystem : ISystem
         }
 
         var room = SystemAPI.GetSingleton<Room>();
-        var start = new Vector3(-0.5f, -0.5f, -0.5f);
-        var end = (Vector3)(float3)room.Dimensions + new Vector3(0.5f, 0.5f, 0.5f);
+        var start = new Vector3(0, 0, 0);
+        var end = (Vector3)(float3)room.Dimensions - new Vector3(1, 1, 1);
 
         for (var i = 1; i < 0b111; i++)
         {
-            var pos = room.Dimensions * new float3(i & 1, (i >> 1) & 1, (i >> 2) & 1);
+            var pos = end * new float3(i & 1, (i >> 1) & 1, (i >> 2) & 1);
             Debug.DrawLine(start, pos, Color.black);
             Debug.DrawLine(end, pos, Color.black);
         }
