@@ -8,6 +8,9 @@ class SingletonAuthoring : MonoBehaviour
 {
     public int3 RoomDimensions;
     public InputActionAsset InputActionAsset;
+
+    public Mesh DebugMesh;
+    public Material DebugMaterial;
 }
 
 class SingletonAuthoringBaker : Baker<SingletonAuthoring>
@@ -19,18 +22,26 @@ class SingletonAuthoringBaker : Baker<SingletonAuthoring>
             entity,
             new Room
             {
-                Dimensions = authoring.RoomDimensions,
+                Bounds = authoring.RoomDimensions,
             }
         );
 
         AddComponent<MovementTick>(entity);
-
 
         AddComponent(
             entity,
             new InputActionsHolder
             {
                 InputActions = authoring.InputActionAsset,
+            }
+        );
+
+        AddComponent(
+            entity,
+            new DebugHolder
+            {
+                Material = authoring.DebugMaterial,
+                Mesh = authoring.DebugMesh,
             }
         );
     }

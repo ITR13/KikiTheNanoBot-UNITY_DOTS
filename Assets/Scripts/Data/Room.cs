@@ -5,6 +5,6 @@ namespace Data
 {
     public struct Room : IComponentData
     {
-        public int3 Dimensions;
+        public int3 Bounds;
     }
 }
