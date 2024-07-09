@@ -11,13 +11,13 @@ public class ObjectAuthoring : MonoBehaviour
     {
         public override void Bake(ObjectAuthoring authoring)
         {
-            if (!authoring.Pushable)
-            {
-                GetEntity(TransformUsageFlags.Renderable);
-                return;
-            }
+            var transformUsageFlags = authoring.Pushable ? TransformUsageFlags.Dynamic : TransformUsageFlags.Renderable;
 
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var entity = GetEntity(transformUsageFlags);
+
+            AddComponent<SolidTag>(entity);
+            if (!authoring.Pushable) return;
+
             AddComponent(entity, new PushableTag());
 
             var climbKnots = AddBuffer<ClimbKnot>(entity);

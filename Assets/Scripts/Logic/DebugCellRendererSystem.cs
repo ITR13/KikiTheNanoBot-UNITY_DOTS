@@ -1,4 +1,5 @@
 using Data;
+using Enums;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -42,7 +43,7 @@ partial struct DebugCellRendererSystem : ISystem
         rp.matProps = new MaterialPropertyBlock();
         rp.matProps.SetColor(WireColor, Color.black);
         Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _fullCubes.AsArray());
-        
+
         rp.matProps.SetColor(WireColor, Color.yellow);
         Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _pushableCubes.AsArray());
     }
@@ -52,6 +53,16 @@ partial struct DebugCellRendererSystem : ISystem
     {
         _fullCubes.Clear();
         _pushableCubes.Clear();
+
+        var colors = new[]
+        {
+            Color.red,
+            Color.green,
+            Color.blue,
+            Color.yellow,
+            Color.cyan,
+            Color.magenta,
+        };
 
         var index = 0;
         for (var z = 0; z < cells.RoomBounds.z; z++)
@@ -80,8 +91,39 @@ partial struct DebugCellRendererSystem : ISystem
                         _pushableCubes.Add(posF);
                     }
 
+                    if (cells.WiresGroup[index] != -1)
+                    {
+                        var color = colors[cells.WiresGroup[index] % colors.Length];
+                        DrawWires(cells, color, index, x, y, z);
+                    }
+
                     index++;
                 }
+            }
+        }
+    }
+
+    private static void DrawWires(CellHolder cells, Color color, int index, int x, int y, int z)
+    {
+        var directions = cells.Wires[index];
+
+        for (var i = 0; i < 6; i++)
+        {
+            var direction = DirectionUtils.IndexToDirection(i);
+
+            if ((directions & direction) == Direction.None) continue;
+
+            var (vector, _) = DirectionUtils.IndexToVectorAndCounterpart(i);
+            var surrounding = DirectionUtils.VectorToSurrounding(vector);
+
+            var center = new float3(x + 0.5f, y + 0.5f, z + 0.5f) + (float3)vector * 0.5f;
+
+            for (var j = 0; j < 2; j++)
+            {
+                var left = center + (float3)surrounding[j * 2] * 0.25f;
+                var rigth = center + (float3)surrounding[j * 2 + 1] * 0.25f;
+
+                Debug.DrawLine(left, rigth, color);
             }
         }
     }
