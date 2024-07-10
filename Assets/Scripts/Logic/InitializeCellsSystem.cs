@@ -38,11 +38,8 @@ partial struct InitializeCellsSystem : ISystem
         var wireTransforms = wireQuery.ToComponentDataArray<LocalToWorld>(state.WorldUpdateAllocator);
         var (wirePositions, wireDirections) = LtwToWires(ref state, wireTransforms);
 
-        Debug.Log($"AAA: {wireTransforms.Length}");
         foreach (var (room, entity) in SystemAPI.Query<Room>().WithAbsent<CellHolder>().WithEntityAccess())
         {
-            Debug.Log($"WireTransforms: {wireTransforms.Length}");
-
             var roomVolume = room.Bounds.x * room.Bounds.y * room.Bounds.z;
             var pushable = new NativeArray<Entity>(roomVolume, Allocator.Persistent);
             var solid = new NativeBitArray(roomVolume, Allocator.Persistent);
