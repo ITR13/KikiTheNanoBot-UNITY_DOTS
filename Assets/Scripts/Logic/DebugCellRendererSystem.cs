@@ -10,8 +10,7 @@ using UnityEngine;
 [UpdateInGroup(typeof(RenderSystemGroup), OrderLast = true)]
 partial struct DebugCellRendererSystem : ISystem
 {
-    private NativeList<Matrix4x4> _fullCubes;
-    private NativeList<Matrix4x4> _pushableCubes;
+    private NativeList<Matrix4x4> _fullCubes, _pushableCubes, _unpoweredGears, _poweredGears;
     private static readonly int WireColor = Shader.PropertyToID("_WireColor");
 
     public void OnCreate(ref SystemState state)
@@ -21,12 +20,16 @@ partial struct DebugCellRendererSystem : ISystem
 
         _fullCubes = new NativeList<Matrix4x4>(64, Allocator.Domain);
         _pushableCubes = new NativeList<Matrix4x4>(64, Allocator.Domain);
+        _unpoweredGears = new NativeList<Matrix4x4>(64, Allocator.Domain);
+        _poweredGears = new NativeList<Matrix4x4>(64, Allocator.Domain);
     }
 
     public void OnDestroy(ref SystemState state)
     {
         _fullCubes.Dispose();
         _pushableCubes.Dispose();
+        _unpoweredGears.Dispose();
+        _poweredGears.Dispose();
     }
 
     public void OnUpdate(ref SystemState state)
@@ -46,6 +49,12 @@ partial struct DebugCellRendererSystem : ISystem
 
         rp.matProps.SetColor(WireColor, Color.yellow);
         Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _pushableCubes.AsArray());
+
+        // rp.matProps.SetColor(WireColor, Color.gray);
+        // Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _unpoweredGears.AsArray());
+        // 
+        // rp.matProps.SetColor(WireColor, Color.white);
+        // Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _poweredGears.AsArray());
     }
 
     [BurstCompile]
@@ -53,6 +62,8 @@ partial struct DebugCellRendererSystem : ISystem
     {
         _fullCubes.Clear();
         _pushableCubes.Clear();
+        _unpoweredGears.Clear();
+        _poweredGears.Clear();
 
         var colors = new[]
         {
@@ -78,6 +89,7 @@ partial struct DebugCellRendererSystem : ISystem
                             Quaternion.identity,
                             new Vector3(0.5f, 0.5f, 0.5f)
                         );
+                        
                         _fullCubes.Add(posF);
                     }
 
@@ -91,9 +103,12 @@ partial struct DebugCellRendererSystem : ISystem
                         _pushableCubes.Add(posF);
                     }
 
-                    if (cells.WiresGroup[index] != -1)
+                    var group = cells.WiresGroup[index];
+                    if (group >= 0)
                     {
-                        var color = colors[cells.WiresGroup[index] % colors.Length];
+                        var color = cells.PoweredGroups.IsSet(group)
+                            ? Color.white
+                            : colors[group % colors.Length];
                         DrawWires(cells, color, index, x, y, z);
                     }
 

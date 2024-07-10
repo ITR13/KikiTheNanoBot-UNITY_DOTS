@@ -47,7 +47,7 @@ partial struct UpdateKnotSystem : ISystem
         }
 
         ref var cellHolder = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
-        foreach (var (knot, entity) in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithEntityAccess())
+        foreach (var knot in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<PushableTag>())
         {
             var index = 1;
             while (index < knot.Length && knot[index].Time < elapsedTime)
@@ -63,8 +63,8 @@ partial struct UpdateKnotSystem : ISystem
                 cellHolder.SetPushable(knot[i].Position, Entity.Null);
                 cellHolder.SetSolid(knot[i].Position, false);
             }
+
             knot.RemoveRange(0, index);
         }
     }
 }
-

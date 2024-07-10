@@ -14,6 +14,7 @@ class PlayerAuthoringBaker : Baker<PlayerAuthoring>
         var entity = GetEntity(TransformUsageFlags.Dynamic);
         AddComponent<Player>(entity);
         AddComponent<PushableTag>(entity);
+        AddComponent<SolidTag>(entity);
 
         var climbKnots = AddBuffer<ClimbKnot>(entity);
         var position = (float3)authoring.transform.position;

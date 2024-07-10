@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using static Data.BoundUtils;
 
 [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Presentation)]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -27,12 +28,12 @@ partial struct InitializeCellsSystem : ISystem
 
         var solidQuery = SystemAPI.QueryBuilder().WithAll<LocalToWorld, SolidTag>().Build();
         var solidTransforms = solidQuery.ToComponentDataArray<LocalToWorld>(state.WorldUpdateAllocator);
-        var solidPositions = LtwToNativeArray(ref state, solidTransforms);
+        var solidPositions = solidTransforms.AsReadOnly().ToPositionArray(state.WorldUpdateAllocator);
 
         var pushableQuery = SystemAPI.QueryBuilder().WithAll<LocalToWorld, PushableTag>().Build();
         var pushableTransforms = pushableQuery.ToComponentDataArray<LocalToWorld>(state.WorldUpdateAllocator);
         var pushableEntities = pushableQuery.ToEntityArray(state.WorldUpdateAllocator);
-        var pushablePositions = LtwToNativeArray(ref state, pushableTransforms);
+        var pushablePositions = pushableTransforms.AsReadOnly().ToPositionArray(state.WorldUpdateAllocator);
 
         var wireQuery = SystemAPI.QueryBuilder().WithAll<LocalToWorld, WireTag>().Build();
         var wireTransforms = wireQuery.ToComponentDataArray<LocalToWorld>(state.WorldUpdateAllocator);
@@ -59,6 +60,7 @@ partial struct InitializeCellsSystem : ISystem
                 new CellHolder
                 {
                     RoomBounds = room.Bounds,
+                    Volume = roomVolume,
                     PushablePositions = pushable,
                     SolidPositions = solid,
                     Wires = wires,
@@ -77,8 +79,8 @@ partial struct InitializeCellsSystem : ISystem
 
             for (var i = 0; i < wirePositions.Length; i++)
             {
-                CellHolderExt.ThrowIfOutOfBounds(cellHolder.RoomBounds, wirePositions[i]);
-                var index = CellHolderExt.GetIndex(cellHolder.RoomBounds, wirePositions[i]);
+                ThrowIfOutOfBounds(cellHolder.RoomBounds, wirePositions[i]);
+                var index = PositionToIndex(cellHolder.RoomBounds, wirePositions[i]);
                 wires[index] |= wireDirections[i];
             }
 
@@ -88,23 +90,12 @@ partial struct InitializeCellsSystem : ISystem
                 WireDfs(ref cellHolder, ref groupCount, wirePositions[i]);
             }
 
+            cellHolder.WireGroupCount = groupCount;
+            cellHolder.PoweredGroups = new NativeBitArray(groupCount, Allocator.Persistent);
+
+
             ecb.AddComponent(entity, cellHolder);
         }
-    }
-
-    private NativeArray<int3> LtwToNativeArray(ref SystemState state, NativeArray<LocalToWorld> locals)
-    {
-        var positions = CollectionHelper.CreateNativeArray<int3>(
-            locals.Length,
-            state.WorldUpdateAllocator,
-            NativeArrayOptions.UninitializedMemory
-        );
-        for (var i = 0; i < positions.Length; i++)
-        {
-            positions[i] = (int3)math.round(locals[i].Position);
-        }
-
-        return positions;
     }
 
     private (NativeArray<int3>, NativeArray<Direction>) LtwToWires(
@@ -168,7 +159,7 @@ partial struct InitializeCellsSystem : ISystem
 
         while (queue.TryDequeue(out var position))
         {
-            var index = CellHolderExt.GetIndex(holder.RoomBounds, position);
+            var index = PositionToIndex(holder.RoomBounds, position);
 
             if (holder.WiresGroup[index] != -1) continue;
             holder.WiresGroup[index] = group;
@@ -194,7 +185,7 @@ partial struct InitializeCellsSystem : ISystem
                 for (var j = 0; j < surrounding.Length; j++)
                 {
                     var otherPosition = surrounding[j] + position;
-                    if (!CellHolderExt.IsOutOfBounds(holder.RoomBounds, otherPosition))
+                    if (!IsOutOfBounds(holder.RoomBounds, otherPosition))
                     {
                         holder.GetWire(otherPosition, out var otherDirection, out var otherGroup);
                         if (otherGroup == -1 && (otherDirection & direction) != Direction.None)
@@ -205,7 +196,7 @@ partial struct InitializeCellsSystem : ISystem
 
 
                     otherPosition += vector;
-                    if (!CellHolderExt.IsOutOfBounds(holder.RoomBounds, otherPosition))
+                    if (!IsOutOfBounds(holder.RoomBounds, otherPosition))
                     {
                         holder.GetWire(otherPosition, out var otherDirection, out var otherGroup);
                         if (otherGroup == -1 && (otherDirection & belowDirectionsNeeded[j]) != Direction.None)
