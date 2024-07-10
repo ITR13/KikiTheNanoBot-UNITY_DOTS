@@ -7,7 +7,6 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-[RequireMatchingQueriesForUpdate]
 [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Presentation)]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct InitializeCellsSystem : ISystem
@@ -15,9 +14,10 @@ partial struct InitializeCellsSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<EndInitializationEntityCommandBufferSystem.Singleton>();
+        var roomQuery = SystemAPI.QueryBuilder().WithAll<Room>().WithAbsent<CellHolder>().Build();
+        state.RequireForUpdate(roomQuery);
     }
 
-    
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -38,8 +38,11 @@ partial struct InitializeCellsSystem : ISystem
         var wireTransforms = wireQuery.ToComponentDataArray<LocalToWorld>(state.WorldUpdateAllocator);
         var (wirePositions, wireDirections) = LtwToWires(ref state, wireTransforms);
 
+        Debug.Log($"AAA: {wireTransforms.Length}");
         foreach (var (room, entity) in SystemAPI.Query<Room>().WithAbsent<CellHolder>().WithEntityAccess())
         {
+            Debug.Log($"WireTransforms: {wireTransforms.Length}");
+
             var roomVolume = room.Bounds.x * room.Bounds.y * room.Bounds.z;
             var pushable = new NativeArray<Entity>(roomVolume, Allocator.Persistent);
             var solid = new NativeBitArray(roomVolume, Allocator.Persistent);
@@ -137,14 +140,14 @@ partial struct InitializeCellsSystem : ISystem
             forwards[i] = math.forward(locals[i].Rotation);
         }
 
-        
+
         for (var i = 0; i < forwards.Length; i++)
         {
             for (var j = 0; j < 3; j++)
             {
                 if (math.abs(forwards[i][j]) < 0.5f) continue;
                 var k = forwards[i][j] < 0 ? 0 : 3;
-               
+
                 directions[i] = (Direction)(1 << (j + k));
                 goto positions;
             }

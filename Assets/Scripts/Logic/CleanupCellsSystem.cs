@@ -22,9 +22,7 @@ partial struct CleanupCellsSystem : ISystem
         foreach (var (cellsRef, entity) in SystemAPI.Query<RefRW<CellHolder>>().WithAbsent<Room>().WithEntityAccess())
         {
             ref var cells = ref cellsRef.ValueRW;
-            cells.SolidPositions.Dispose();
-            cells.PushablePositions.Dispose();
-
+            cells.Dispose();
             ecb.RemoveComponent<CellHolder>(entity);
         }
     }

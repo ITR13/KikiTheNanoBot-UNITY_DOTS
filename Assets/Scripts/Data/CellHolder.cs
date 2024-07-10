@@ -11,5 +11,13 @@ public struct CellHolder : ICleanupComponentData
 
     public NativeArray<Direction> Wires;
     public NativeArray<int> WiresGroup;
+
+    public void Dispose()
+    {
+        SolidPositions.Dispose();
+        PushablePositions.Dispose();
+        Wires.Dispose();
+        WiresGroup.Dispose();
+    }
 }
 
