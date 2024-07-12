@@ -1,12 +1,12 @@
 using Data;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 class SingletonAuthoring : MonoBehaviour
 {
-    public int3 RoomDimensions;
     public InputActionAsset InputActionAsset;
 
 #if UNITY_EDITOR
@@ -20,15 +20,6 @@ class SingletonAuthoringBaker : Baker<SingletonAuthoring>
     public override void Bake(SingletonAuthoring authoring)
     {
         var entity = GetEntity(TransformUsageFlags.None);
-        AddComponent(
-            entity,
-            new Room
-            {
-                Bounds = authoring.RoomDimensions,
-            }
-        );
-
-        AddComponent<MovementTick>(entity);
 
         AddComponent(
             entity,

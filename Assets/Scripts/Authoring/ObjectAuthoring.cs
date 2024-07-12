@@ -11,10 +11,10 @@ public class ObjectAuthoring : MonoBehaviour
     public bool Pushable;
 
     public bool Gear;
-    public bool GearGenerator;
+    public bool GearMotor;
     public bool GearToWire;
 
-public bool WireCube;
+    public bool WireCube;
 
     public class ObjectAuthoringBaker : Baker<ObjectAuthoring>
     {
@@ -27,6 +27,7 @@ public bool WireCube;
             AddComponent<SolidTag>(entity);
 
             var position = (float3)authoring.transform.position;
+            var positionI = (int3)math.round(position);
 
             if (authoring.Pushable || authoring.Gear || authoring.WireCube)
             {
@@ -34,20 +35,31 @@ public bool WireCube;
                 multiPositions.Add(
                     new MultiPosition
                     {
-                        Position = (int3)math.round(position),
+                        Position = positionI,
                         Time = 0,
                     }
                 );
             }
 
-            var generator = authoring.Gear && authoring.GearGenerator;
+            var motor = authoring.Gear && authoring.GearMotor;
             var gearToWire = authoring.Gear && authoring.GearToWire;
 
-            if (authoring.Gear) AddComponent<Gear>(entity);
-            if (generator) AddComponent<GeneratorTag>(entity);
+            if (authoring.Gear)
+            {
+                AddComponent<Gear>(entity);
+                AddComponent(
+                    entity,
+                    new GearSpeed
+                    {
+                        Speed = ((positionI.x + positionI.z) & 1) * 2 - 1,
+                    }
+                );
+            }
+
+            if (motor) AddComponent<MotorTag>(entity);
             if (gearToWire) AddComponent<GearToWireTag>(entity);
-            
-            if(authoring.WireCube) AddComponent<WireCube>(entity);
+
+            if (authoring.WireCube) AddComponent<WireCube>(entity);
 
             if (!authoring.Pushable) return;
 

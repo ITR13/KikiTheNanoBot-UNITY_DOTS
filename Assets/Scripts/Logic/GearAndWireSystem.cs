@@ -22,9 +22,10 @@ namespace Logic
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            state.CompleteDependency();
             var changeQuery = SystemAPI.QueryBuilder()
                 .WithAll<MultiPosition>()
-                .WithAny<Gear, WireCube, GeneratorTag>()
+                .WithAny<Gear, WireCube, MotorTag>()
                 .Build();
             changeQuery.SetChangedVersionFilter(MultiPosition);
 
@@ -65,7 +66,7 @@ namespace Logic
             }
 
             // Propagate gear power
-            foreach (var startPositions in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<GeneratorTag>())
+            foreach (var startPositions in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<MotorTag>())
             {
                 if (startPositions.Length > 1) continue;
                 var startPosition = startPositions[0].Position;
@@ -148,7 +149,7 @@ namespace Logic
                         var surroundingPosition = position + vector;
 
                         if (IsOutOfBounds(bounds, surroundingPosition)) continue;
-                    
+
                         // Check if the cube is powering a wire directly
                         cells.GetWire(surroundingPosition, out var wireDirections, out var group);
                         if (group >= 0 &&
@@ -165,11 +166,11 @@ namespace Logic
                         wireCubeMap[surroundingIndex].ValueRW.Powered = true;
                         wireCubeQueue.Enqueue(surroundingPosition);
                     }
-                    
+
                     // TODO: Also check for diagonal cubes
                 }
 
-                if (!poweredWire) continue;
+                if (!poweredWire) break;
                 poweredWire = false;
                 foreach (
                     var (positions, wireCube)
@@ -186,7 +187,7 @@ namespace Logic
                         var surroundingPosition = position + vector;
 
                         if (IsOutOfBounds(bounds, surroundingPosition)) continue;
-                        
+
                         cells.GetWire(surroundingPosition, out var wireDirections, out var group);
                         if (
                             group < 0 ||
@@ -196,7 +197,7 @@ namespace Logic
                         {
                             continue;
                         }
-                        
+
                         // NB: Queue the cube, not the wire position
                         var index = PositionToIndex(bounds, position);
                         wireCubeMap[index].ValueRW.Powered = true;

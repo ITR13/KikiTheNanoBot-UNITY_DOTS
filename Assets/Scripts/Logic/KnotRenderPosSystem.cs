@@ -39,8 +39,8 @@ partial struct KnotRenderPosSystem : ISystem
             }
             else if ((knot[1].Flags & ClimbFlags.FallForward) != ClimbFlags.None)
             {
-                lerpTime = math.cos(normalizedTime * math.PIHALF);
-                slerpTime = math.cos((1 - normalizedTime) * math.PIHALF);
+                // lerpTime = math.cos(normalizedTime * math.PIHALF);
+                // slerpTime = math.cos((1 - normalizedTime) * math.PIHALF);
             }
 
             localTransformRw.Position = math.lerp(knot[0].Position, knot[1].Position, lerpTime);

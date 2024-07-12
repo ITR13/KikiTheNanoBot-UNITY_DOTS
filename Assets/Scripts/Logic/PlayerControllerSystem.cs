@@ -13,13 +13,17 @@ partial class PlayerControllerSystem : SystemBase
 {
     private InputAction _move, _look, _shoot, _jump, _push;
 
+    // I'm lazy, sue me
+    private bool _hasJumped;
+
     protected override void OnCreate()
     {
         RequireForUpdate<Player>();
         RequireForUpdate<InputActionsHolder>();
         RequireForUpdate<CellHolder>();
+        RequireForUpdate<Goal>();
     }
-    
+
     protected override void OnStartRunning()
     {
         var actions = SystemAPI.GetSingleton<InputActionsHolder>().InputActions.Value;
@@ -32,12 +36,13 @@ partial class PlayerControllerSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var direction = new int2(_move.ReadValue<Vector2>());
+        var direction = new float2(_move.ReadValue<Vector2>());
         var push = _push.IsPressed();
         var jumpHeld = _jump.IsPressed();
-        var jumpReleased = _jump.WasReleasedThisFrame();
+        var jumpReleased = _jump.WasReleasedThisFrame() && !_hasJumped;
 
         UpdateBursted(direction, push, jumpHeld, jumpReleased);
+        _hasJumped &= jumpHeld;
     }
 
     [BurstCompile]
@@ -45,10 +50,26 @@ partial class PlayerControllerSystem : SystemBase
     {
         CompleteDependency();
         var player = SystemAPI.GetSingletonEntity<Player>();
+        var goal = SystemAPI.GetSingleton<Goal>();
         var multiPositions = SystemAPI.GetBuffer<MultiPosition>(player);
+
+        var time = (float)SystemAPI.Time.ElapsedTime;
+
+        if (goal.Active && math.all(multiPositions[^1].Position == goal.Position))
+        {
+            SystemAPI.SetComponentEnabled<Fall>(player, false);
+            if (goal.WinAtTime > time + 1)
+            {
+                goal.WinAtTime = time + 1;
+                SystemAPI.SetSingleton(goal);
+            }
+
+            return;
+        }
+
+
         var climbKnots = SystemAPI.GetBuffer<ClimbKnot>(player);
         var rotateKnots = SystemAPI.GetBuffer<RotateKnot>(player);
-        var time = (float)SystemAPI.Time.ElapsedTime;
 
         Climb(
             time,
@@ -90,14 +111,15 @@ partial class PlayerControllerSystem : SystemBase
 
         var nextPositionI = (int3)nextPosition;
         var nextIsOwn = CheckPosition(nextPositionI, multiPositions);
-
         ref var cells = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
+        var nextIsSolid = !nextIsOwn && cells.IsSolid(nextPositionI);
+
         var fallingForward = false;
         if (
             (lastKnot.Flags & (ClimbFlags.JumpForward | ClimbFlags.Fall)) != ClimbFlags.None &&
             time < player.FallForwardDeadline &&
             multiplier > 0 &&
-            !cells.IsSolid(nextPositionI)
+            !nextIsSolid
         )
         {
             while (climbKnots.Length > 1 && climbKnots[^1].Flags == ClimbFlags.Fall)
@@ -159,7 +181,7 @@ partial class PlayerControllerSystem : SystemBase
         if (attemptJumpForward)
         {
             var jumpForwardPositionI = nextPositionI - downI;
-            var jumpUpInstead = cells.IsSolid(jumpForwardPositionI);
+            var jumpUpInstead = cells.IsSolid(jumpForwardPositionI) || nextIsSolid;
             var destination = jumpUpInstead ? jumpPositionI : jumpForwardPositionI;
             var isOwn = jumpUpInstead ? aboveIsOwn : CheckPosition(jumpForwardPositionI, multiPositions);
             var flags = jumpUpInstead ? ClimbFlags.Jump : ClimbFlags.JumpForward;
@@ -171,6 +193,7 @@ partial class PlayerControllerSystem : SystemBase
 
             HandlePlayerCells(playerEntity, multiPositions, isOwn, destination, ref cells);
             QueueJump(time, multiPositions, climbKnots, destination, lastKnot, flags);
+            _hasJumped = true;
 
             return;
         }
@@ -196,7 +219,7 @@ partial class PlayerControllerSystem : SystemBase
         }
 
         // TODO: If slippery and not grounded, disallow climbing
-        if (!push && !nextIsOwn && cells.IsSolid(nextPositionI))
+        if (!push && nextIsSolid)
         {
             QueueClimbUp(time, climbKnots, multiplier, rotation, lastKnot);
 
@@ -213,6 +236,7 @@ partial class PlayerControllerSystem : SystemBase
         {
             HandlePlayerCells(playerEntity, multiPositions, nextIsOwn, nextPositionI, ref cells);
             QueueMove(time, multiPositions, climbKnots, nextPositionI, nextPosition, lastKnot);
+            SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
             return;
         }
 
@@ -242,6 +266,7 @@ partial class PlayerControllerSystem : SystemBase
                 nextPosition,
                 down
             );
+            SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
         }
     }
 

@@ -9,17 +9,20 @@ using UnityEngine;
 [UpdateInGroup(typeof(RenderSystemGroup), OrderLast = true)]
 partial struct DebugRendererSystem : ISystem
 {
+    private static readonly int GoalAlpha = Shader.PropertyToID("_GoalAlpha");
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<Room>();
+        Shader.SetGlobalFloat(GoalAlpha, 0.5f);
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var offset = new float3(0.5f, 0.5f, 0.5f);
-        
+
         foreach (var transform in SystemAPI.Query<LocalToWorld>())
         {
             var startPosition = transform.Position + offset;
@@ -32,7 +35,7 @@ partial struct DebugRendererSystem : ISystem
         var start = new Vector3(0, 0, 0);
         var end = (Vector3)(float3)room.Bounds - new Vector3(1, 1, 1);
 
-        
+
         for (var i = 1; i < 0b111; i++)
         {
             var pos = end * new float3(i & 1, (i >> 1) & 1, (i >> 2) & 1);

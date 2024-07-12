@@ -9,7 +9,7 @@ public class ObjectAuthoringEditor : Editor
 
         var pushableProp = serializedObject.FindProperty("Pushable");
         var gearProp = serializedObject.FindProperty("Gear");
-        var gearGeneratorProp = serializedObject.FindProperty("GearGenerator");
+        var gearMotorProp = serializedObject.FindProperty("GearMotor");
         var gearToWireProp = serializedObject.FindProperty("GearToWire");
         var wireCubeProp = serializedObject.FindProperty("WireCube");
 
@@ -19,7 +19,7 @@ public class ObjectAuthoringEditor : Editor
 
         using (new EditorGUI.DisabledScope(!gearProp.boolValue))
         {
-            EditorGUILayout.PropertyField(gearGeneratorProp);
+            EditorGUILayout.PropertyField(gearMotorProp);
             EditorGUILayout.PropertyField(gearToWireProp);
         }
 

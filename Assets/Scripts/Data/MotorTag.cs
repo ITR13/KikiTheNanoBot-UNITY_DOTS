@@ -2,7 +2,7 @@
 
 namespace Data
 {
-    public struct GeneratorTag : IComponentData
+    public struct MotorTag : IComponentData
     {
     }
 }
