@@ -137,7 +137,7 @@ namespace Logic
 
             // TODO: Swap this full wire propagation later
             // Propagate Wire power
-            while (poweredWire || !wireCubeQueue.IsEmpty())
+            do
             {
                 // Iterate newly powered cubes
                 while (wireCubeQueue.TryDequeue(out var position))
@@ -162,7 +162,8 @@ namespace Logic
 
                         // Check if cube is powering another cube
                         var surroundingIndex = PositionToIndex(bounds, surroundingPosition);
-                        if (!wireCubeMap[surroundingIndex].IsValid) continue;
+                        if (!wireCubeMap[surroundingIndex].IsValid || wireCubeMap[surroundingIndex].ValueRO.Powered)
+                            continue;
                         wireCubeMap[surroundingIndex].ValueRW.Powered = true;
                         wireCubeQueue.Enqueue(surroundingPosition);
                     }
@@ -204,7 +205,7 @@ namespace Logic
                         wireCubeQueue.Enqueue(position);
                     }
                 }
-            }
+            } while (!wireCubeQueue.IsEmpty());
         }
     }
 }
