@@ -12,12 +12,9 @@ using UnityEngine;
 partial struct DebugCellRendererSystem : ISystem
 {
     private NativeList<Matrix4x4> _fullCubes, _pushableCubes;
-    private static readonly int WireColor = Shader.PropertyToID("_WireColor");
-    private static readonly int EdgeColor = Shader.PropertyToID("_EdgeColor");
-    private static readonly int BaseColor = Shader.PropertyToID("BaseColor");
-
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<ShaderProperties>();
         state.RequireForUpdate<DebugHolder>();
         state.RequireForUpdate<CellHolder>();
 
@@ -35,6 +32,7 @@ partial struct DebugCellRendererSystem : ISystem
     {
         state.CompleteDependency();
         var cells = SystemAPI.GetSingleton<CellHolder>();
+        var shaderProperties = SystemAPI.GetSingleton<ShaderProperties>();
         UpdateArrays(cells);
 
         var debug = SystemAPI.GetSingleton<DebugHolder>();
@@ -43,10 +41,10 @@ partial struct DebugCellRendererSystem : ISystem
             RenderParams rp = new RenderParams(debug.Material);
             rp.worldBounds = new Bounds(roomBoundsF / 2, roomBoundsF);
             rp.matProps = new MaterialPropertyBlock();
-            rp.matProps.SetColor(WireColor, Color.gray / 2);
+            rp.matProps.SetColor(shaderProperties.WireColor, Color.gray / 2);
             Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _fullCubes.AsArray());
 
-            rp.matProps.SetColor(WireColor, Color.yellow);
+            rp.matProps.SetColor(shaderProperties.WireColor, Color.yellow);
             Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _pushableCubes.AsArray());
         }
     }

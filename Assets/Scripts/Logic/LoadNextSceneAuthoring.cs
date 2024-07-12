@@ -1,4 +1,5 @@
 ﻿using Data;
+using Enums;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Scenes;
@@ -8,11 +9,10 @@ namespace Logic
 {
     public partial struct LoadNextSceneAuthoring : ISystem
     {
-        private static readonly int GoalAlpha = Shader.PropertyToID("_GoalAlpha");
-
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<ShaderProperties>();
             state.RequireForUpdate<LevelData>();
             state.RequireForUpdate<LoadedLevel>();
         }
@@ -34,7 +34,8 @@ namespace Logic
                 SceneSystem.UnloadScene(state.WorldUnmanaged, loadedLevel.Entity);
             }
 
-            Shader.SetGlobalFloat(GoalAlpha, 0.5f);
+            var shaderProperties = SystemAPI.GetSingleton<ShaderProperties>();
+            Shader.SetGlobalFloat(shaderProperties.GoalAlpha, 0.5f);
             var levels = SystemAPI.GetSingletonBuffer<LevelData>();
             var sceneEntity = SceneSystem.LoadSceneAsync(
                 state.WorldUnmanaged,

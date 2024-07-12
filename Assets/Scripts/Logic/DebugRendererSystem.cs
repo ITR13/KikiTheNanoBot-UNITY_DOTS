@@ -9,13 +9,10 @@ using UnityEngine;
 [UpdateInGroup(typeof(RenderSystemGroup), OrderLast = true)]
 partial struct DebugRendererSystem : ISystem
 {
-    private static readonly int GoalAlpha = Shader.PropertyToID("_GoalAlpha");
-
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<Room>();
-        Shader.SetGlobalFloat(GoalAlpha, 0.5f);
     }
 
     [BurstCompile]

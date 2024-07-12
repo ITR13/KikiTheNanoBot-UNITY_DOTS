@@ -11,7 +11,7 @@ namespace Logic
 {
     public partial struct GearAndWireSystem : ISystem
     {
-        public ComponentType MultiPosition;
+        private ComponentType MultiPosition;
 
         public void OnCreate(ref SystemState state)
         {
@@ -65,6 +65,13 @@ namespace Logic
                 }
             }
 
+            // In hindsight, should've just made this a readonly span
+            var surroundingArray = new NativeArray<int3>(4, Allocator.Temp);
+            surroundingArray[0] = new int3(1, 0, 0);
+            surroundingArray[1] = new int3(-1, 0, 0);
+            surroundingArray[2] = new int3(0, 0, 1);
+            surroundingArray[3] = new int3(0, 0, -1);
+
             // Propagate gear power
             foreach (var startPositions in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<MotorTag>())
             {
@@ -85,16 +92,9 @@ namespace Logic
                 {
                     ThrowIfOutOfBounds(bounds, position);
 
-                    var surrounding = new[]
+                    foreach (var delta in surroundingArray)
                     {
-                        position + new int3(1, 0, 0),
-                        position + new int3(-1, 0, 0),
-                        position + new int3(0, 0, 1),
-                        position + new int3(0, 0, -1),
-                    };
-
-                    foreach (var otherPos in surrounding)
-                    {
+                        var otherPos = position + delta;
                         if (IsOutOfBounds(bounds, otherPos)) continue;
 
                         var otherIndex = PositionToIndex(bounds, otherPos);

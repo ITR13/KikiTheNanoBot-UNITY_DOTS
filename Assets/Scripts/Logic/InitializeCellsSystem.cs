@@ -174,13 +174,11 @@ partial struct InitializeCellsSystem : ISystem
 
                 var surrounding = DirectionUtils.VectorToSurrounding(vector);
 
-                var belowDirectionsNeeded = new[]
-                {
-                    (Direction)(1 << ((counterPart + 1) % 6)),
-                    (Direction)(1 << ((counterPart + 4) % 6)),
-                    (Direction)(1 << ((counterPart + 5) % 6)),
-                    (Direction)(1 << ((counterPart + 2) % 6)),
-                };
+                var belowDirectionsNeeded = new NativeArray<Direction>(4, Allocator.Temp);
+                belowDirectionsNeeded[0] = (Direction)(1 << ((counterPart + 1) % 6));
+                belowDirectionsNeeded[1] = (Direction)(1 << ((counterPart + 4) % 6));
+                belowDirectionsNeeded[2] = (Direction)(1 << ((counterPart + 5) % 6));
+                belowDirectionsNeeded[3] = (Direction)(1 << ((counterPart + 2) % 6));
 
                 for (var j = 0; j < surrounding.Length; j++)
                 {
