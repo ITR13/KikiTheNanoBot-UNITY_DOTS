@@ -1,8 +1,14 @@
+using Enums;
 using Unity.Entities;
 using Unity.Mathematics;
 
-public struct MultiPosition : IBufferElementData
+
+namespace Data
 {
-    public float Time;
-    public int3 Position;
+    public struct MultiPosition : IBufferElementData
+    {
+        public float Time;
+        public int3 Position;
+        public ClimbFlags Flags;
+    }
 }

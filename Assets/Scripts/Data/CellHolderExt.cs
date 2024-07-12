@@ -4,6 +4,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
 using static Data.BoundUtils;
 
 namespace Data
@@ -31,7 +32,7 @@ namespace Data
         {
             ThrowIfOutOfBounds(holder.RoomBounds, position);
             var index = PositionToIndex(holder.RoomBounds, position);
-            ThrowIfSetTo(holder.SolidPositions, index, solid);
+            ErrorIfSetTo(holder.SolidPositions, index, solid);
             holder.SolidPositions.Set(index, solid);
         }
 
@@ -39,7 +40,7 @@ namespace Data
         {
             ThrowIfOutOfBounds(holder.RoomBounds, position);
             var index = PositionToIndex(holder.RoomBounds, position);
-            ThrowIfWrongFill(holder.PushablePositions, index, entity != Entity.Null);
+            ErrorIfWrongFill(holder.PushablePositions, index, entity != Entity.Null);
             holder.PushablePositions[index] = entity;
         }
 
@@ -53,24 +54,17 @@ namespace Data
         }
 
         [BurstDiscard]
-        private static void ThrowIfSetTo(NativeBitArray bitArray, int index, bool set)
+        private static void ErrorIfSetTo(NativeBitArray bitArray, int index, bool set)
         {
             if (bitArray.IsSet(index) != set) return;
-            throw new ArgumentException(
-                nameof(index),
-                $"Tried to set index {index} to {set}, but it was already {set}"
-            );
+            Debug.LogError($"Tried to set index {index} to {set}, but it was already {set}");
         }
 
         [BurstDiscard]
-        private static void ThrowIfWrongFill(NativeArray<Entity> bitArray, int index, bool shouldBeEmpty)
+        private static void ErrorIfWrongFill(NativeArray<Entity> bitArray, int index, bool shouldBeEmpty)
         {
             if (bitArray[index] == Entity.Null == shouldBeEmpty) return;
-
-            throw new ArgumentException(
-                nameof(index),
-                $"Index {index} already contains {bitArray[index]}"
-            );
+            Debug.LogError($"Index {index} already contains {bitArray[index]}");
         }
     }
 }

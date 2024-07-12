@@ -1,4 +1,5 @@
 using Data;
+using Enums;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -13,11 +14,12 @@ partial struct KnotRenderPosSystem : ISystem
         var time = SystemAPI.Time;
         var elapsedTime = (float)time.ElapsedTime;
 
-        foreach (
-            var (localTransform, knot, entity)
-            in SystemAPI.Query<RefRW<LocalTransform>, DynamicBuffer<ClimbKnot>>().WithEntityAccess())
-        {
+        var jumpFlags = ClimbFlags.Jump | ClimbFlags.JumpForward;
 
+        foreach (
+            var (localTransform, knot)
+            in SystemAPI.Query<RefRW<LocalTransform>, DynamicBuffer<ClimbKnot>>())
+        {
             ref var localTransformRw = ref localTransform.ValueRW;
             if (knot.Length == 1)
             {
@@ -27,9 +29,22 @@ partial struct KnotRenderPosSystem : ISystem
             }
 
             var normalizedTime = math.unlerp(knot[0].Time, knot[1].Time, elapsedTime);
+            var lerpTime = normalizedTime;
+            var slerpTime = normalizedTime;
 
-            localTransformRw.Position = math.lerp(knot[0].Position, knot[1].Position, normalizedTime);
-            localTransformRw.Rotation = math.slerp(knot[0].Rotation, knot[1].Rotation, normalizedTime);
+            if ((knot[1].Flags & jumpFlags) != ClimbFlags.None)
+            {
+                lerpTime = math.cos((1 - normalizedTime) * math.PIHALF);
+                slerpTime = math.cos(normalizedTime * math.PIHALF);
+            }
+            else if ((knot[1].Flags & ClimbFlags.FallForward) != ClimbFlags.None)
+            {
+                lerpTime = math.cos(normalizedTime * math.PIHALF);
+                slerpTime = math.cos((1 - normalizedTime) * math.PIHALF);
+            }
+
+            localTransformRw.Position = math.lerp(knot[0].Position, knot[1].Position, lerpTime);
+            localTransformRw.Rotation = math.slerp(knot[0].Rotation, knot[1].Rotation, slerpTime);
         }
 
         foreach (

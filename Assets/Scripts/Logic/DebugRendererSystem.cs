@@ -32,6 +32,7 @@ partial struct DebugRendererSystem : ISystem
         var start = new Vector3(0, 0, 0);
         var end = (Vector3)(float3)room.Bounds - new Vector3(1, 1, 1);
 
+        
         for (var i = 1; i < 0b111; i++)
         {
             var pos = end * new float3(i & 1, (i >> 1) & 1, (i >> 2) & 1);

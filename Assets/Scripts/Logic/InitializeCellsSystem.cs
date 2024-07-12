@@ -125,7 +125,7 @@ partial struct InitializeCellsSystem : ISystem
 
         for (var i = 0; i < positions.Length; i++)
         {
-            forwards[i] = math.forward(locals[i].Rotation);
+            forwards[i] = -math.forward(locals[i].Rotation);
         }
 
 

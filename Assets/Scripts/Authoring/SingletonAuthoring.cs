@@ -9,8 +9,10 @@ class SingletonAuthoring : MonoBehaviour
     public int3 RoomDimensions;
     public InputActionAsset InputActionAsset;
 
+#if UNITY_EDITOR
     public Mesh DebugMesh;
     public Material DebugMaterial;
+#endif
 }
 
 class SingletonAuthoringBaker : Baker<SingletonAuthoring>
@@ -36,6 +38,7 @@ class SingletonAuthoringBaker : Baker<SingletonAuthoring>
             }
         );
 
+#if UNITY_EDITOR
         AddComponent(
             entity,
             new DebugHolder
@@ -44,5 +47,6 @@ class SingletonAuthoringBaker : Baker<SingletonAuthoring>
                 Mesh = authoring.DebugMesh,
             }
         );
+#endif
     }
 }

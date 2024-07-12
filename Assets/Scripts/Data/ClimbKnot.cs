@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Enums;
+using Unity.Entities;
 using Unity.Mathematics;
 
 namespace Data
@@ -8,5 +9,6 @@ namespace Data
         public float Time;
         public float3 Position;
         public quaternion Rotation;
+        public ClimbFlags Flags;
     }
 }

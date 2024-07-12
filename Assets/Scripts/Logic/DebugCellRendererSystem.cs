@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using Data;
 using Enums;
 using Unity.Burst;
@@ -10,8 +11,10 @@ using UnityEngine;
 [UpdateInGroup(typeof(RenderSystemGroup), OrderLast = true)]
 partial struct DebugCellRendererSystem : ISystem
 {
-    private NativeList<Matrix4x4> _fullCubes, _pushableCubes, _unpoweredGears, _poweredGears;
+    private NativeList<Matrix4x4> _fullCubes, _pushableCubes;
     private static readonly int WireColor = Shader.PropertyToID("_WireColor");
+    private static readonly int EdgeColor = Shader.PropertyToID("_EdgeColor");
+    private static readonly int BaseColor = Shader.PropertyToID("BaseColor");
 
     public void OnCreate(ref SystemState state)
     {
@@ -20,16 +23,12 @@ partial struct DebugCellRendererSystem : ISystem
 
         _fullCubes = new NativeList<Matrix4x4>(64, Allocator.Domain);
         _pushableCubes = new NativeList<Matrix4x4>(64, Allocator.Domain);
-        _unpoweredGears = new NativeList<Matrix4x4>(64, Allocator.Domain);
-        _poweredGears = new NativeList<Matrix4x4>(64, Allocator.Domain);
     }
 
     public void OnDestroy(ref SystemState state)
     {
         _fullCubes.Dispose();
         _pushableCubes.Dispose();
-        _unpoweredGears.Dispose();
-        _poweredGears.Dispose();
     }
 
     public void OnUpdate(ref SystemState state)
@@ -40,21 +39,16 @@ partial struct DebugCellRendererSystem : ISystem
 
         var debug = SystemAPI.GetSingleton<DebugHolder>();
         var roomBoundsF = (float3)cells.RoomBounds;
+        {
+            RenderParams rp = new RenderParams(debug.Material);
+            rp.worldBounds = new Bounds(roomBoundsF / 2, roomBoundsF);
+            rp.matProps = new MaterialPropertyBlock();
+            rp.matProps.SetColor(WireColor, Color.gray / 2);
+            Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _fullCubes.AsArray());
 
-        RenderParams rp = new RenderParams(debug.Material);
-        rp.worldBounds = new Bounds(roomBoundsF / 2, roomBoundsF);
-        rp.matProps = new MaterialPropertyBlock();
-        rp.matProps.SetColor(WireColor, Color.black);
-        Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _fullCubes.AsArray());
-
-        rp.matProps.SetColor(WireColor, Color.yellow);
-        Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _pushableCubes.AsArray());
-
-        // rp.matProps.SetColor(WireColor, Color.gray);
-        // Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _unpoweredGears.AsArray());
-        // 
-        // rp.matProps.SetColor(WireColor, Color.white);
-        // Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _poweredGears.AsArray());
+            rp.matProps.SetColor(WireColor, Color.yellow);
+            Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _pushableCubes.AsArray());
+        }
     }
 
     [BurstCompile]
@@ -62,8 +56,6 @@ partial struct DebugCellRendererSystem : ISystem
     {
         _fullCubes.Clear();
         _pushableCubes.Clear();
-        _unpoweredGears.Clear();
-        _poweredGears.Clear();
 
         var colors = new[]
         {
@@ -89,7 +81,7 @@ partial struct DebugCellRendererSystem : ISystem
                             Quaternion.identity,
                             new Vector3(0.5f, 0.5f, 0.5f)
                         );
-                        
+
                         _fullCubes.Add(posF);
                     }
 
@@ -143,3 +135,4 @@ partial struct DebugCellRendererSystem : ISystem
         }
     }
 }
+#endif

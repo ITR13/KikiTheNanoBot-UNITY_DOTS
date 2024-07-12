@@ -1,5 +1,6 @@
 using System;
 using Data;
+using Enums;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -81,6 +82,7 @@ partial struct FallSystem : ISystem
                     Position = nextPosition,
                     Rotation = faller.ClimbKnots[^1].Rotation,
                     Time = endTime,
+                    Flags = ClimbFlags.Fall,
                 }
             );
             faller.MultiPositions.Add(
@@ -88,6 +90,7 @@ partial struct FallSystem : ISystem
                 {
                     Position = nextPosition,
                     Time = endTime,
+                    Flags = ClimbFlags.Fall,
                 }
             );
 

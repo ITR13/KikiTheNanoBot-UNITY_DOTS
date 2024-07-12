@@ -1,4 +1,5 @@
 using Data;
+using Enums;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -24,6 +25,7 @@ class PlayerAuthoringBaker : Baker<PlayerAuthoring>
                 Position = position,
                 Rotation = Quaternion.identity,
                 Time = 0,
+                Flags = ClimbFlags.None,
             }
         );
 
@@ -33,6 +35,7 @@ class PlayerAuthoringBaker : Baker<PlayerAuthoring>
             {
                 Position = (int3)math.round(position),
                 Time = 0,
+                Flags = ClimbFlags.None,
             }
         );
 
