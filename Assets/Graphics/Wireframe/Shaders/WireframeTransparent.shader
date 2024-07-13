@@ -21,6 +21,7 @@ Shader "SuperSystems/Wireframe-Transparent"
 		{
 			Blend SrcAlpha OneMinusSrcAlpha
             ZWrite Off
+            ZTest Off
 			Cull Off
 
 			// Wireframe shader based on the the following

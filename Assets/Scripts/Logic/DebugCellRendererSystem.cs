@@ -43,7 +43,7 @@ namespace Logic
                 var rp = new RenderParams(debug.Material);
                 rp.worldBounds = new Bounds(roomBoundsF / 2, roomBoundsF);
                 rp.matProps = new MaterialPropertyBlock();
-                rp.matProps.SetColor(shaderProperties.WireColor, Color.gray / 2);
+                rp.matProps.SetColor(shaderProperties.WireColor, Color.green / 2);
                 UnityEngine.Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _fullCubes.AsArray());
 
                 rp.matProps.SetColor(shaderProperties.WireColor, Color.yellow);
@@ -75,7 +75,7 @@ namespace Logic
                 if (cells.SolidPositions.IsSet(index))
                 {
                     var posF = Matrix4x4.TRS(
-                        new Vector3(x + 0.5f, y + 0.5f, z + 0.5f),
+                        new Vector3(x, y, z),
                         Quaternion.identity,
                         new Vector3(0.5f, 0.5f, 0.5f)
                     );
@@ -86,7 +86,7 @@ namespace Logic
                 if (cells.PushablePositions[index] != Entity.Null)
                 {
                     var posF = Matrix4x4.TRS(
-                        new Vector3(x + 0.5f, y + 0.5f, z + 0.5f),
+                        new Vector3(x, y, z),
                         Quaternion.identity,
                         new Vector3(0.25f, 0.25f, 0.25f)
                     );
@@ -119,7 +119,7 @@ namespace Logic
                 var (vector, _) = DirectionUtils.IndexToVectorAndCounterpart(i);
                 var surrounding = DirectionUtils.VectorToSurrounding(vector);
 
-                var center = new float3(x + 0.5f, y + 0.5f, z + 0.5f) + (float3)vector * 0.5f;
+                var center = new float3(x, y, z) + (float3)vector * 0.5f;
 
                 for (var j = 0; j < 2; j++)
                 {

@@ -20,14 +20,14 @@ namespace Logic
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var offset = new float3(0.5f, 0.5f, 0.5f);
+            var offset = float3.zero;
 
             foreach (var transform in SystemAPI.Query<LocalToWorld>())
             {
                 var startPosition = transform.Position + offset;
-                Debug.DrawLine(startPosition, startPosition + transform.Right * 0.5f, Color.red);
-                Debug.DrawLine(startPosition, startPosition + transform.Up * 0.5f, Color.green);
-                Debug.DrawLine(startPosition, startPosition + transform.Forward * 0.5f, Color.blue);
+                Debug.DrawLine(startPosition, startPosition + transform.Right * 0.25f, Color.red);
+                Debug.DrawLine(startPosition, startPosition + transform.Up * 0.25f, Color.green);
+                Debug.DrawLine(startPosition, startPosition + transform.Forward * 0.25f, Color.blue);
             }
 
             var room = SystemAPI.GetSingleton<Room>();
