@@ -3,13 +3,14 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ assembly name="G:\DevEnvs\Unity\6000.0.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.CoreModule.dll" #>
 <#@ import namespace="UnityEngine" #>
-using Unity.Entities;
+using Unity.Burst;
 using UnityEngine;
 
 namespace Enums
 {
-    public struct ShaderProperties : IComponentData
+    public struct ShaderProperties
     {
+        public static readonly SharedStatic<ShaderProperties> Instance = SharedStatic<ShaderProperties>.GetOrCreate<ShaderProperties>();
 <#
     var properties = new[]
     {
@@ -23,27 +24,21 @@ namespace Enums
 <#
     }
 #>
-    }
 
-    [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-    public partial struct ShaderPropertiesBakingSystem : ISystem
-    {
-        public void OnUpdate(ref SystemState state)
+        [RuntimeInitializeOnLoadMethod]
+        private static void Initialize()
         {
-            if (SystemAPI.HasSingleton<ShaderProperties>()) return;
-            state.EntityManager.CreateSingleton(
-                new ShaderProperties
-                {
+            Instance.Data = new ShaderProperties
+            {
 <#
     foreach (var property in properties)
     {
 #>
-                    <#= property #> = Shader.PropertyToID("_<#= property #>"),
+                <#= property #> = Shader.PropertyToID("_<#= property #>"),
 <#
     }
 #>
-                }
-            );
+            };
         }
     }
 }

@@ -12,7 +12,6 @@ namespace Logic
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<ShaderProperties>();
             state.RequireForUpdate<LevelData>();
             state.RequireForUpdate<LoadedLevel>();
         }
@@ -34,8 +33,6 @@ namespace Logic
                 SceneSystem.UnloadScene(state.WorldUnmanaged, loadedLevel.Entity);
             }
 
-            var shaderProperties = SystemAPI.GetSingleton<ShaderProperties>();
-            Shader.SetGlobalFloat(shaderProperties.GoalAlpha, 0.5f);
             var levels = SystemAPI.GetSingletonBuffer<LevelData>();
             var sceneEntity = SceneSystem.LoadSceneAsync(
                 state.WorldUnmanaged,

@@ -1,27 +1,22 @@
-using Unity.Entities;
+﻿using Unity.Burst;
 using UnityEngine;
 
 namespace Enums
 {
-    public struct ShaderProperties : IComponentData
+    public struct ShaderProperties
     {
+        public static readonly SharedStatic<ShaderProperties> Instance = SharedStatic<ShaderProperties>.GetOrCreate<ShaderProperties>();
         public int GoalAlpha;
         public int WireColor;
-    }
 
-    [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-    public partial struct ShaderPropertiesBakingSystem : ISystem
-    {
-        public void OnUpdate(ref SystemState state)
+        [RuntimeInitializeOnLoadMethod]
+        private static void Initialize()
         {
-            if (SystemAPI.HasSingleton<ShaderProperties>()) return;
-            state.EntityManager.CreateSingleton(
-                new ShaderProperties
-                {
-                    GoalAlpha = Shader.PropertyToID("_GoalAlpha"),
-                    WireColor = Shader.PropertyToID("_WireColor"),
-                }
-            );
+            Instance.Data = new ShaderProperties
+            {
+                GoalAlpha = Shader.PropertyToID("_GoalAlpha"),
+                WireColor = Shader.PropertyToID("_WireColor"),
+            };
         }
     }
 }

@@ -14,7 +14,6 @@ partial struct DebugCellRendererSystem : ISystem
     private NativeList<Matrix4x4> _fullCubes, _pushableCubes;
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<ShaderProperties>();
         state.RequireForUpdate<DebugHolder>();
         state.RequireForUpdate<CellHolder>();
 
@@ -32,7 +31,7 @@ partial struct DebugCellRendererSystem : ISystem
     {
         state.CompleteDependency();
         var cells = SystemAPI.GetSingleton<CellHolder>();
-        var shaderProperties = SystemAPI.GetSingleton<ShaderProperties>();
+        var shaderProperties = ShaderProperties.Instance.Data;
         UpdateArrays(cells);
 
         var debug = SystemAPI.GetSingleton<DebugHolder>();
