@@ -173,28 +173,16 @@ namespace Logic
                     if (positions.Length > 1 || wireCube.ValueRO.Powered) continue;
                     var position = positions[^1].Position;
 
-                    // Check if the cube is now powered by a wire next to it
-                    for (var i = 0; i < 6; i++)
-                    {
-                        var direction = DirectionUtils.IndexToDirection(i);
-                        var (vector, _) = DirectionUtils.IndexToVectorAndCounterpart(i);
-                        var surroundingPosition = position + vector;
-
-                        if (IsOutOfBounds(bounds, surroundingPosition)) continue;
-
-                        cells.GetWire(surroundingPosition, out var wireDirections, out var group);
-                        if (
-                            group < 0 ||
-                            !cells.PoweredGroups.IsSet(group) ||
-                            (wireDirections & (Direction)(~(int)direction)) == Direction.None
-                        )
-                            continue;
-
-                        // NB: Queue the cube, not the wire position
-                        var index = PositionToIndex(bounds, position);
-                        wireCubeMap[index].ValueRW.Powered = true;
-                        wireCubeQueue.Enqueue(position);
-                    }
+                    cells.GetWire(position, out var _, out var group);
+                    if (
+                        group < 0 ||
+                        !cells.PoweredGroups.IsSet(group)
+                    )
+                        continue;
+                    // NB: Queue the cube, not the wire position
+                    var index = PositionToIndex(bounds, position);
+                    wireCubeMap[index].ValueRW.Powered = true;
+                    wireCubeQueue.Enqueue(position);
                 }
             } while (!wireCubeQueue.IsEmpty());
         }

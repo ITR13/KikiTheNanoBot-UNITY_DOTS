@@ -4,7 +4,7 @@ namespace Data
 {
     public struct LoadedLevel : IComponentData
     {
-        public int NextLevelIndex;
+        public int CurrentLevelIndex;
         public Entity Entity;
     }
 }

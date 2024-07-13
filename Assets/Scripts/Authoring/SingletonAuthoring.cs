@@ -23,7 +23,7 @@ namespace Authoring
 
             AddComponent(
                 entity,
-                new InputActionsHolder
+                new InputComponent
                 {
                     InputActions = authoring.InputActionAsset,
                 }

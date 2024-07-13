@@ -16,15 +16,22 @@ namespace Authoring
 
         public bool WireCube;
 
+        public bool Shootable;
+
         public class ObjectAuthoringBaker : Baker<ObjectAuthoring>
         {
             public override void Bake(ObjectAuthoring authoring)
             {
-                var transformUsageFlags = authoring.Pushable ? TransformUsageFlags.Dynamic : TransformUsageFlags.Renderable;
+                var transformUsageFlags =
+                    authoring.Pushable ? TransformUsageFlags.Dynamic : TransformUsageFlags.Renderable;
 
                 var entity = GetEntity(transformUsageFlags);
 
                 AddComponent<SolidTag>(entity);
+                if (authoring.Shootable)
+                {
+                    AddComponent<DisabledSwitchTag>(entity);
+                }
 
                 var position = (float3)authoring.transform.position;
                 var positionI = (int3)math.round(position);

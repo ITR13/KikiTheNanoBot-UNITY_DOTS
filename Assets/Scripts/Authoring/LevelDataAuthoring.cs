@@ -17,7 +17,14 @@ namespace Authoring
             public override void Bake(LevelDataAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.None);
-                AddComponent<LoadedLevel>(entity);
+                AddComponent(
+                    entity,
+                    new LoadedLevel
+                    {
+                        Entity = Entity.Null,
+                        CurrentLevelIndex = -1,
+                    }
+                );
 
                 var buffer = AddBuffer<LevelData>(entity);
                 foreach (var level in authoring.Levels)

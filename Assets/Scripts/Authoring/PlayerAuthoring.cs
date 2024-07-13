@@ -8,6 +8,7 @@ namespace Authoring
 {
     internal class PlayerAuthoring : MonoBehaviour
     {
+        public GameObject Bullet;
     }
 
     internal class PlayerAuthoringBaker : Baker<PlayerAuthoring>
@@ -15,17 +16,26 @@ namespace Authoring
         public override void Bake(PlayerAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
-            AddComponent<Player>(entity);
+            AddComponent(
+                entity,
+                new Player
+                {
+                    BulletPrefab = GetEntity(authoring.Bullet, TransformUsageFlags.Renderable),
+                    FallForwardDeadline = float.NegativeInfinity,
+                }
+            );
             AddComponent<PushableTag>(entity);
             AddComponent<SolidTag>(entity);
 
             var climbKnots = AddBuffer<ClimbKnot>(entity);
-            var position = (float3)authoring.transform.position;
+            var transform = authoring.transform;
+            var position = (float3)transform.position;
+            var rotation = (quaternion)transform.rotation;
             climbKnots.Add(
                 new ClimbKnot
                 {
                     Position = position,
-                    Rotation = Quaternion.identity,
+                    Rotation = rotation,
                     Time = 0,
                     Flags = ClimbFlags.None,
                 }

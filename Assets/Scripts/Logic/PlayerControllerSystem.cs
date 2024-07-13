@@ -4,52 +4,49 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Logic
 {
-    [BurstCompile]
     [UpdateInGroup(typeof(ControlSystemGroup))]
     [UpdateBefore(typeof(FallSystem))]
-    internal partial class PlayerControllerSystem : SystemBase
+    internal partial struct PlayerControllerSystem : ISystem
     {
         // I'm lazy, sue me
         private bool _hasJumped;
-        private InputAction _move, _look, _shoot, _jump, _push;
 
-        protected override void OnCreate()
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate<Player>();
-            RequireForUpdate<InputActionsHolder>();
-            RequireForUpdate<CellHolder>();
-            RequireForUpdate<Goal>();
+            state.RequireForUpdate<Player>();
+            state.RequireForUpdate<InputComponent>();
+            state.RequireForUpdate<CellHolder>();
+            state.RequireForUpdate<Goal>();
         }
 
-        protected override void OnStartRunning()
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
         {
-            var actions = SystemAPI.GetSingleton<InputActionsHolder>().InputActions.Value;
-            _move = actions.FindAction("Move");
-            _look = actions.FindAction("Look");
-            _shoot = actions.FindAction("Shoot");
-            _jump = actions.FindAction("Jump");
-            _push = actions.FindAction("Push");
-        }
+            state.CompleteDependency();
+            var inputs = SystemAPI.GetSingleton<InputComponent>();
 
-        protected override void OnUpdate()
-        {
-            var direction = new float2(_move.ReadValue<Vector2>());
-            var push = _push.IsPressed();
-            var jumpHeld = _jump.IsPressed();
-            var jumpReleased = _jump.WasReleasedThisFrame() && !_hasJumped;
+            var direction = inputs.Move;
+            var push = inputs.Push.CurrentlyPressed;
+            var jumpHeld = inputs.Jump.CurrentlyPressed;
+            var jumpReleased = inputs.Jump.ReleasedThisFrame && !_hasJumped;
 
-            UpdateBursted(direction, push, jumpHeld, jumpReleased);
+            UpdateBursted(ref state, direction, push, jumpHeld, jumpReleased);
             _hasJumped &= jumpHeld;
         }
 
         [BurstCompile]
-        private void UpdateBursted(in float2 direction, bool push, bool jumpHeld, bool jumpReleased)
+        private void UpdateBursted(
+            ref SystemState state,
+            in float2 direction,
+            bool push,
+            bool jumpHeld,
+            bool jumpReleased
+        )
         {
-            CompleteDependency();
             var player = SystemAPI.GetSingletonEntity<Player>();
             var goal = SystemAPI.GetSingleton<Goal>();
             var multiPositions = SystemAPI.GetBuffer<MultiPosition>(player);
@@ -73,6 +70,7 @@ namespace Logic
             var rotateKnots = SystemAPI.GetBuffer<RotateKnot>(player);
 
             Climb(
+                ref state,
                 time,
                 player,
                 multiPositions,
@@ -84,10 +82,11 @@ namespace Logic
                 jumpReleased
             );
 
-            if (direction.x != 0) Rotate(rotateKnots, math.sign(direction.x), time);
+            if (direction.x != 0) Rotate(ref state, time, rotateKnots, math.sign(direction.x));
         }
 
         private void Climb(
+            ref SystemState state,
             float time,
             Entity playerEntity,
             DynamicBuffer<MultiPosition> multiPositions,
@@ -168,7 +167,7 @@ namespace Logic
                 if (!jumpReleased || !canJump) return;
 
                 HandlePlayerCells(playerEntity, multiPositions, aboveIsOwn, jumpPositionI, ref cells);
-                QueueJump(time, multiPositions, climbKnots, jumpPositionI, lastKnot, ClimbFlags.Jump);
+                QueueJump(ref state, time, multiPositions, climbKnots, jumpPositionI, lastKnot, ClimbFlags.Jump);
                 return;
             }
 
@@ -187,7 +186,7 @@ namespace Logic
                 }
 
                 HandlePlayerCells(playerEntity, multiPositions, isOwn, destination, ref cells);
-                QueueJump(time, multiPositions, climbKnots, destination, lastKnot, flags);
+                QueueJump(ref state, time, multiPositions, climbKnots, destination, lastKnot, flags);
                 _hasJumped = true;
 
                 return;
@@ -197,6 +196,7 @@ namespace Logic
 
             if (isGrounded && !nextIsOwn && push && cells.IsPushable(nextPositionI, out var pushableEntity))
                 push = HandlePushing(
+                    ref state,
                     ref time,
                     climbKnots,
                     pushableEntity,
@@ -234,7 +234,7 @@ namespace Logic
             if (fallingForward)
             {
                 HandlePlayerCells(playerEntity, multiPositions, posUnderNextIsOwn, posUnderNextI, ref cells);
-                QueueJump(time, multiPositions, climbKnots, posUnderNextI, lastKnot, ClimbFlags.FallForward);
+                QueueJump(ref state, time, multiPositions, climbKnots, posUnderNextI, lastKnot, ClimbFlags.FallForward);
                 player.FallForwardDeadline = float.NegativeInfinity;
                 SystemAPI.SetComponent(playerEntity, player);
                 return;
@@ -406,6 +406,7 @@ namespace Logic
         }
 
         private bool HandlePushing(
+            ref SystemState state,
             ref float time,
             DynamicBuffer<ClimbKnot> climbKnots,
             Entity pushableEntity,
@@ -480,6 +481,7 @@ namespace Logic
         }
 
         private void QueueJump(
+            ref SystemState state,
             float time,
             DynamicBuffer<MultiPosition> multiPositions,
             DynamicBuffer<ClimbKnot> climbKnots,
@@ -516,7 +518,7 @@ namespace Logic
             return isInList;
         }
 
-        private void Rotate(DynamicBuffer<RotateKnot> rotateKnots, float multiplier, float time)
+        private void Rotate(ref SystemState state, float time, DynamicBuffer<RotateKnot> rotateKnots, float multiplier)
         {
             if (rotateKnots.Length > 1) return;
 

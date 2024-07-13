@@ -1,17 +1,23 @@
 ﻿using Data;
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Scenes;
+using UnityEngine;
 
 namespace Logic
 {
     public partial struct LoadNextSceneAuthoring : ISystem
     {
+        private double _forceDelay;
+
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<InputComponent>();
             state.RequireForUpdate<LevelData>();
             state.RequireForUpdate<LoadedLevel>();
+            _forceDelay = double.NegativeInfinity;
         }
 
         [BurstCompile]
@@ -20,21 +26,60 @@ namespace Logic
             state.CompleteDependency();
             var loadedLevel = SystemAPI.GetSingleton<LoadedLevel>();
 
-            if (loadedLevel.Entity != Entity.Null)
+            var time = SystemAPI.Time.ElapsedTime;
+            ref var input = ref SystemAPI.GetSingletonRW<InputComponent>().ValueRW;
+
+            if (input.Reset.PressedThisFrame)
+            {
+                LoadLevel(ref state, loadedLevel, loadedLevel.CurrentLevelIndex);
+            }
+            else if (input.NextLevel.PressedThisFrame)
+            {
+                LoadLevel(ref state, loadedLevel, loadedLevel.CurrentLevelIndex + 1);
+            }
+            else if (input.PreviousLevel.PressedThisFrame)
+            {
+                LoadLevel(ref state, loadedLevel, loadedLevel.CurrentLevelIndex - 1);
+            }
+            else if (loadedLevel.Entity != Entity.Null)
             {
                 if (!SystemAPI.HasSingleton<Goal>()) return;
 
                 // ReSharper disable once Unity.Entities.SingletonMustBeRequested
                 var goal = SystemAPI.GetSingleton<Goal>();
-                var time = SystemAPI.Time.ElapsedTime;
                 if (time < goal.WinAtTime) return;
-                SceneSystem.UnloadScene(state.WorldUnmanaged, loadedLevel.Entity);
+                LoadLevel(ref state, loadedLevel, loadedLevel.CurrentLevelIndex + 1);
+            }
+            else
+            {
+                if (time < _forceDelay) return;
+                _forceDelay = time + 1;
+                LoadLevel(ref state, loadedLevel, loadedLevel.CurrentLevelIndex + 1);
+            }
+
+
+            input.Reset = default;
+            input.NextLevel = default;
+            input.PreviousLevel = default;
+        }
+
+        private void LoadLevel(ref SystemState state, LoadedLevel loadedLevel, int level)
+        {
+            if (loadedLevel.Entity != Entity.Null)
+            {
+                SceneSystem.UnloadScene(state.WorldUnmanaged, loadedLevel.Entity, SceneSystem.UnloadParameters.DestroyMetaEntities);
+                SystemAPI.SetSingleton(
+                    new LoadedLevel { Entity = Entity.Null, CurrentLevelIndex = loadedLevel.CurrentLevelIndex }
+                );
             }
 
             var levels = SystemAPI.GetSingletonBuffer<LevelData>();
+            level = math.clamp(level, 0, levels.Length - 1);
+            var nextScene = levels[level].SceneReference;
+
             var sceneEntity = SceneSystem.LoadSceneAsync(
                 state.WorldUnmanaged,
-                levels[loadedLevel.NextLevelIndex].SceneReference,
+                nextScene,
                 new SceneSystem.LoadParameters
                 {
                     AutoLoad = true,
@@ -43,7 +88,7 @@ namespace Logic
                 }
             );
             SystemAPI.SetSingleton(
-                new LoadedLevel { Entity = sceneEntity, NextLevelIndex = loadedLevel.NextLevelIndex + 1 }
+                new LoadedLevel { Entity = sceneEntity, CurrentLevelIndex = level }
             );
         }
     }

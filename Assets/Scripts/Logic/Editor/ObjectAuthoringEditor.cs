@@ -13,6 +13,7 @@ public class ObjectAuthoringEditor : Editor
         var gearMotorProp = serializedObject.FindProperty("GearMotor");
         var gearToWireProp = serializedObject.FindProperty("GearToWire");
         var wireCubeProp = serializedObject.FindProperty("WireCube");
+        var shootableProp = serializedObject.FindProperty("Shootable");
 
         EditorGUILayout.PropertyField(pushableProp);
         EditorGUILayout.PropertyField(gearProp);
@@ -27,6 +28,8 @@ public class ObjectAuthoringEditor : Editor
         EditorGUILayout.PropertyField(wireCubeProp);
         if (wireCubeProp.boolValue) gearProp.boolValue = false;
 
+        EditorGUILayout.PropertyField(shootableProp);
+        
         serializedObject.ApplyModifiedProperties();
     }
 }

@@ -5,6 +5,7 @@ using Unity.Entities;
 namespace Logic
 {
     [UpdateInGroup(typeof(RenderSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.Presentation | WorldSystemFilterFlags.Editor)]
     public partial struct ActivateGoalSystem : ISystem
     {
         [BurstCompile]
@@ -21,9 +22,12 @@ namespace Logic
 
             var isPowered = !SystemAPI.HasComponent<WireCube>(goalEntity) ||
                             SystemAPI.GetComponent<WireCube>(goalEntity).Powered;
+            var hasAllSwitches = SystemAPI.QueryBuilder().WithAll<DisabledSwitchTag>().Build().IsEmpty;
 
-            if (goal.Active == isPowered) return;
-            goal.Active = isPowered;
+            var active = isPowered && hasAllSwitches;
+
+            if (goal.Active == active) return;
+            goal.Active = active;
             SystemAPI.SetSingleton(goal);
         }
     }

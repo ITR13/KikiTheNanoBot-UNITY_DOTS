@@ -6,10 +6,11 @@ using UnityEngine;
 
 namespace Logic
 {
+    [UpdateInGroup(typeof(RenderSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.Presentation | WorldSystemFilterFlags.Editor)]
     public partial struct GoalRenderSystem : ISystem
     {
         private ComponentType _goalType;
-
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<Goal>();
@@ -24,7 +25,7 @@ namespace Logic
             if (goalQuery.IsEmpty) return;
             var goal = goalQuery.GetSingleton<Goal>();
             var property = ShaderProperties.Instance.Data.GoalAlpha;
-            Shader.SetGlobalFloat(property, goal.Active ? 0.5f : 1f);
+            Shader.SetGlobalFloat(property, goal.Active ? 1f : 0.5f);
         }
     }
 }

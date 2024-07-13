@@ -4,8 +4,7 @@ using Unity.Entities;
 
 namespace Logic
 {
-    [UpdateInGroup(typeof(ControlSystemGroup))]
-    [UpdateBefore(typeof(PlayerControllerSystem))]
+    [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
     internal partial struct UpdateKnotSystem : ISystem
     {
         public void OnCreate(ref SystemState state)

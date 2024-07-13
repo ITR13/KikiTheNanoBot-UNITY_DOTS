@@ -11,7 +11,7 @@ namespace Authoring
     {
         private void Update()
         {
-            transform.position = transform.localScale / 2f - new Vector3(0.5f, 0.5f, 0.5f);
+            transform.position = math.floor(transform.localScale / 2f - new Vector3(0.5f, 0.5f, 0.5f));
         }
 
         public class RoomAuthoringBaker : Baker<RoomAuthoring>
