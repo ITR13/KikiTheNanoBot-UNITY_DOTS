@@ -5,12 +5,11 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using static Data.BoundUtils;
 
 [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Presentation)]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-partial struct InitializeCellsSystem : ISystem
+internal partial struct InitializeCellsSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
@@ -51,10 +50,7 @@ partial struct InitializeCellsSystem : ISystem
                 Allocator.Persistent,
                 NativeArrayOptions.UninitializedMemory
             );
-            for (var i = 0; i < wireGroups.Length; i++)
-            {
-                wireGroups[i] = -1;
-            }
+            for (var i = 0; i < wireGroups.Length; i++) wireGroups[i] = -1;
 
             var cellHolder =
                 new CellHolder
@@ -67,15 +63,10 @@ partial struct InitializeCellsSystem : ISystem
                     WiresGroup = wireGroups,
                 };
 
-            foreach (var solidPosition in solidPositions)
-            {
-                cellHolder.SetSolid(solidPosition, true);
-            }
+            foreach (var solidPosition in solidPositions) cellHolder.SetSolid(solidPosition, true);
 
             for (var i = 0; i < pushablePositions.Length; i++)
-            {
                 cellHolder.SetPushable(pushablePositions[i], pushableEntities[i]);
-            }
 
             for (var i = 0; i < wirePositions.Length; i++)
             {
@@ -85,10 +76,7 @@ partial struct InitializeCellsSystem : ISystem
             }
 
             var groupCount = 0;
-            for (var i = 0; i < wirePositions.Length; i++)
-            {
-                WireDfs(ref cellHolder, ref groupCount, wirePositions[i]);
-            }
+            for (var i = 0; i < wirePositions.Length; i++) WireDfs(ref cellHolder, ref groupCount, wirePositions[i]);
 
             cellHolder.WireGroupCount = groupCount;
             cellHolder.PoweredGroups = new NativeBitArray(groupCount, Allocator.Persistent);
@@ -118,15 +106,9 @@ partial struct InitializeCellsSystem : ISystem
             state.WorldUpdateAllocator,
             NativeArrayOptions.UninitializedMemory
         );
-        for (var i = 0; i < positions.Length; i++)
-        {
-            positions[i] = (int3)math.round(locals[i].Position);
-        }
+        for (var i = 0; i < positions.Length; i++) positions[i] = (int3)math.round(locals[i].Position);
 
-        for (var i = 0; i < positions.Length; i++)
-        {
-            forwards[i] = math.forward(locals[i].Rotation);
-        }
+        for (var i = 0; i < positions.Length; i++) forwards[i] = math.forward(locals[i].Rotation);
 
 
         for (var i = 0; i < forwards.Length; i++)
@@ -187,9 +169,7 @@ partial struct InitializeCellsSystem : ISystem
                     {
                         holder.GetWire(otherPosition, out var otherDirection, out var otherGroup);
                         if (otherGroup == -1 && (otherDirection & direction) != Direction.None)
-                        {
                             queue.Enqueue(otherPosition);
-                        }
                     }
 
 
@@ -198,9 +178,7 @@ partial struct InitializeCellsSystem : ISystem
                     {
                         holder.GetWire(otherPosition, out var otherDirection, out var otherGroup);
                         if (otherGroup == -1 && (otherDirection & belowDirectionsNeeded[j]) != Direction.None)
-                        {
                             queue.Enqueue(otherPosition);
-                        }
                     }
                 }
             }

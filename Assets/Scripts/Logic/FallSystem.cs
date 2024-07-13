@@ -8,7 +8,7 @@ using Unity.Mathematics;
 
 [BurstCompile]
 [UpdateInGroup(typeof(ControlSystemGroup))]
-partial struct FallSystem : ISystem
+internal partial struct FallSystem : ISystem
 {
     private struct Faller : IComparable<Faller>
     {
@@ -86,7 +86,7 @@ partial struct FallSystem : ISystem
                 }
             );
             faller.MultiPositions.Add(
-                new MultiPosition()
+                new MultiPosition
                 {
                     Position = nextPosition,
                     Time = endTime,

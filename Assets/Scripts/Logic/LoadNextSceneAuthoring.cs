@@ -1,9 +1,7 @@
 ﻿using Data;
-using Enums;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Scenes;
-using UnityEngine;
 
 namespace Logic
 {

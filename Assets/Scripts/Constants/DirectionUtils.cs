@@ -11,7 +11,7 @@ namespace Enums
         {
             return (Direction)(1 << index);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (int3, int) IndexToVectorAndCounterpart(int index)
         {
@@ -21,16 +21,16 @@ namespace Enums
 
             vector[mod] = div * 2 - 1;
             var counterPart = (1 - div) * 3 + mod;
-            
+
             return (vector, counterPart);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<int3> VectorToSurrounding(int3 vector)
         {
             var array = new NativeArray<int3>(4, Allocator.Temp);
             array[0] = new int3(vector.z, vector.x, vector.y);
-            array[1] = new int3(-vector.z, -vector.x, -vector.y); 
+            array[1] = new int3(-vector.z, -vector.x, -vector.y);
             array[2] = new int3(vector.y, vector.z, vector.x);
             array[3] = new int3(-vector.y, -vector.z, -vector.x);
 

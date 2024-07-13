@@ -2,14 +2,15 @@ using System.Collections.Generic;
 using Data;
 using Unity.Entities;
 using Unity.Entities.Serialization;
+using UnityEditor;
 using UnityEngine;
 
 #if UNITY_EDITOR
 public class LevelDataAuthoring : MonoBehaviour
 {
-    public List<UnityEditor.SceneAsset> Levels;
+    public List<SceneAsset> Levels;
 
-    class Baker : Baker<LevelDataAuthoring>
+    private class Baker : Baker<LevelDataAuthoring>
     {
         public override void Bake(LevelDataAuthoring authoring)
         {

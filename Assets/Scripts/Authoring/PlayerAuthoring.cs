@@ -4,11 +4,11 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-class PlayerAuthoring : MonoBehaviour
+internal class PlayerAuthoring : MonoBehaviour
 {
 }
 
-class PlayerAuthoringBaker : Baker<PlayerAuthoring>
+internal class PlayerAuthoringBaker : Baker<PlayerAuthoring>
 {
     public override void Bake(PlayerAuthoring authoring)
     {
@@ -41,7 +41,7 @@ class PlayerAuthoringBaker : Baker<PlayerAuthoring>
 
         var rotateKnots = AddBuffer<RotateKnot>(entity);
         rotateKnots.Add(
-            new RotateKnot()
+            new RotateKnot
             {
                 Rotation = Quaternion.identity,
                 Time = 0,

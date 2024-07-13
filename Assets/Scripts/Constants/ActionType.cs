@@ -8,7 +8,7 @@
         ClimbUp,
         ClimbDown,
         TurnLeft,
-        TurnRight, 
+        TurnRight,
         Jump,
         JumpForward,
         FallForward,

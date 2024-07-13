@@ -1,9 +1,7 @@
-using System;
 using Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [ExecuteAlways]
 public class ObjectAuthoring : MonoBehaviour

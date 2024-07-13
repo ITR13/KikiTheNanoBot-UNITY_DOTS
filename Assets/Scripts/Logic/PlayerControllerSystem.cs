@@ -9,12 +9,11 @@ using UnityEngine.InputSystem;
 [BurstCompile]
 [UpdateInGroup(typeof(ControlSystemGroup))]
 [UpdateBefore(typeof(FallSystem))]
-partial class PlayerControllerSystem : SystemBase
+internal partial class PlayerControllerSystem : SystemBase
 {
-    private InputAction _move, _look, _shoot, _jump, _push;
-
     // I'm lazy, sue me
     private bool _hasJumped;
+    private InputAction _move, _look, _shoot, _jump, _push;
 
     protected override void OnCreate()
     {
@@ -83,10 +82,7 @@ partial class PlayerControllerSystem : SystemBase
             jumpReleased
         );
 
-        if (direction.x != 0)
-        {
-            Rotate(rotateKnots, math.sign(direction.x), time);
-        }
+        if (direction.x != 0) Rotate(rotateKnots, math.sign(direction.x), time);
     }
 
     private void Climb(
@@ -122,10 +118,7 @@ partial class PlayerControllerSystem : SystemBase
             !nextIsSolid
         )
         {
-            while (climbKnots.Length > 1 && climbKnots[^1].Flags == ClimbFlags.Fall)
-            {
-                climbKnots.Length--;
-            }
+            while (climbKnots.Length > 1 && climbKnots[^1].Flags == ClimbFlags.Fall) climbKnots.Length--;
 
             while (multiPositions.Length > 1 && multiPositions[^1].Flags == ClimbFlags.Fall)
             {
@@ -201,7 +194,6 @@ partial class PlayerControllerSystem : SystemBase
         var nextNextPosition = nextPositionI + (int3)moveDirection;
 
         if (isGrounded && !nextIsOwn && push && cells.IsPushable(nextPositionI, out var pushableEntity))
-        {
             push = HandlePushing(
                 ref time,
                 climbKnots,
@@ -212,11 +204,8 @@ partial class PlayerControllerSystem : SystemBase
                 downI,
                 ref lastKnot
             );
-        }
         else
-        {
             push = false;
-        }
 
         // TODO: If slippery and not grounded, disallow climbing
         if (!push && nextIsSolid)
@@ -371,12 +360,8 @@ partial class PlayerControllerSystem : SystemBase
         if (removeFromOwn)
         {
             for (var i = multiPositions.Length - 1; i >= 0; i--)
-            {
                 if (math.all(multiPositions[i].Position == position))
-                {
                     multiPositions.RemoveAt(i);
-                }
-            }
         }
         else
         {
@@ -524,10 +509,7 @@ partial class PlayerControllerSystem : SystemBase
     private bool CheckPosition(int3 position, DynamicBuffer<MultiPosition> positions)
     {
         var isInList = false;
-        for (var i = 0; i < positions.Length; i++)
-        {
-            isInList |= math.all(positions[i].Position == position);
-        }
+        for (var i = 0; i < positions.Length; i++) isInList |= math.all(positions[i].Position == position);
 
         return isInList;
     }
@@ -550,7 +532,7 @@ partial class PlayerControllerSystem : SystemBase
         var rotation = quaternion.AxisAngle(new float3(0, 1, 0), math.PIHALF * multiplier);
 
         rotateKnots.Add(
-            new RotateKnot()
+            new RotateKnot
             {
                 Rotation = math.mul(rotation, firstKnot.Rotation),
                 Time = time + 0.2f,

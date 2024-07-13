@@ -9,9 +9,10 @@ using UnityEngine;
 
 [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Presentation)]
 [UpdateInGroup(typeof(RenderSystemGroup), OrderLast = true)]
-partial struct DebugCellRendererSystem : ISystem
+internal partial struct DebugCellRendererSystem : ISystem
 {
     private NativeList<Matrix4x4> _fullCubes, _pushableCubes;
+
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<DebugHolder>();
@@ -37,7 +38,7 @@ partial struct DebugCellRendererSystem : ISystem
         var debug = SystemAPI.GetSingleton<DebugHolder>();
         var roomBoundsF = (float3)cells.RoomBounds;
         {
-            RenderParams rp = new RenderParams(debug.Material);
+            var rp = new RenderParams(debug.Material);
             rp.worldBounds = new Bounds(roomBoundsF / 2, roomBoundsF);
             rp.matProps = new MaterialPropertyBlock();
             rp.matProps.SetColor(shaderProperties.WireColor, Color.gray / 2);
@@ -66,44 +67,40 @@ partial struct DebugCellRendererSystem : ISystem
 
         var index = 0;
         for (var z = 0; z < cells.RoomBounds.z; z++)
+        for (var y = 0; y < cells.RoomBounds.y; y++)
+        for (var x = 0; x < cells.RoomBounds.x; x++)
         {
-            for (var y = 0; y < cells.RoomBounds.y; y++)
+            if (cells.SolidPositions.IsSet(index))
             {
-                for (var x = 0; x < cells.RoomBounds.x; x++)
-                {
-                    if (cells.SolidPositions.IsSet(index))
-                    {
-                        var posF = Matrix4x4.TRS(
-                            new Vector3(x + 0.5f, y + 0.5f, z + 0.5f),
-                            Quaternion.identity,
-                            new Vector3(0.5f, 0.5f, 0.5f)
-                        );
+                var posF = Matrix4x4.TRS(
+                    new Vector3(x + 0.5f, y + 0.5f, z + 0.5f),
+                    Quaternion.identity,
+                    new Vector3(0.5f, 0.5f, 0.5f)
+                );
 
-                        _fullCubes.Add(posF);
-                    }
-
-                    if (cells.PushablePositions[index] != Entity.Null)
-                    {
-                        var posF = Matrix4x4.TRS(
-                            new Vector3(x + 0.5f, y + 0.5f, z + 0.5f),
-                            Quaternion.identity,
-                            new Vector3(0.25f, 0.25f, 0.25f)
-                        );
-                        _pushableCubes.Add(posF);
-                    }
-
-                    var group = cells.WiresGroup[index];
-                    if (group >= 0)
-                    {
-                        var color = cells.PoweredGroups.IsSet(group)
-                            ? Color.white
-                            : colors[group % colors.Length];
-                        DrawWires(cells, color, index, x, y, z);
-                    }
-
-                    index++;
-                }
+                _fullCubes.Add(posF);
             }
+
+            if (cells.PushablePositions[index] != Entity.Null)
+            {
+                var posF = Matrix4x4.TRS(
+                    new Vector3(x + 0.5f, y + 0.5f, z + 0.5f),
+                    Quaternion.identity,
+                    new Vector3(0.25f, 0.25f, 0.25f)
+                );
+                _pushableCubes.Add(posF);
+            }
+
+            var group = cells.WiresGroup[index];
+            if (group >= 0)
+            {
+                var color = cells.PoweredGroups.IsSet(group)
+                    ? Color.white
+                    : colors[group % colors.Length];
+                DrawWires(cells, color, index, x, y, z);
+            }
+
+            index++;
         }
     }
 

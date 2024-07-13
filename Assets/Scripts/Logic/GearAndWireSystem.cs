@@ -4,7 +4,6 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using static Data.BoundUtils;
 
 namespace Logic
@@ -83,10 +82,7 @@ namespace Logic
                 queue.Enqueue(startPosition);
 
                 var startIndex = PositionToIndex(bounds, startPosition);
-                if (gearMap[startIndex].IsValid)
-                {
-                    gearMap[startIndex].ValueRW.Powered = true;
-                }
+                if (gearMap[startIndex].IsValid) gearMap[startIndex].ValueRW.Powered = true;
 
                 while (queue.TryDequeue(out var position))
                 {
@@ -141,7 +137,6 @@ namespace Logic
             {
                 // Iterate newly powered cubes
                 while (wireCubeQueue.TryDequeue(out var position))
-                {
                     for (var i = 0; i < 6; i++)
                     {
                         var direction = DirectionUtils.IndexToDirection(i);
@@ -168,9 +163,7 @@ namespace Logic
                         wireCubeQueue.Enqueue(surroundingPosition);
                     }
 
-                    // TODO: Also check for diagonal cubes
-                }
-
+                // TODO: Also check for diagonal cubes
                 if (!poweredWire) break;
                 poweredWire = false;
                 foreach (
@@ -195,9 +188,7 @@ namespace Logic
                             !cells.PoweredGroups.IsSet(group) ||
                             (wireDirections & (Direction)(~(int)direction)) == Direction.None
                         )
-                        {
                             continue;
-                        }
 
                         // NB: Queue the cube, not the wire position
                         var index = PositionToIndex(bounds, position);

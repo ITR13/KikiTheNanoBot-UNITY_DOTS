@@ -7,7 +7,7 @@ using UnityEngine;
 
 [WorldSystemFilter(WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.Presentation)]
 [UpdateInGroup(typeof(RenderSystemGroup), OrderLast = true)]
-partial struct DebugRendererSystem : ISystem
+internal partial struct DebugRendererSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)

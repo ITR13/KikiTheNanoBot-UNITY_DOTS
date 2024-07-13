@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(RenderSystemGroup))]
-partial struct KnotRenderPosSystem : ISystem
+internal partial struct KnotRenderPosSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState state)

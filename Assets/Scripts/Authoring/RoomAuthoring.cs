@@ -1,5 +1,4 @@
-﻿using System;
-using Data;
+﻿using Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;

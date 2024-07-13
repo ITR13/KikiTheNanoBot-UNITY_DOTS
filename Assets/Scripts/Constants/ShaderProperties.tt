@@ -1,8 +1,5 @@
 ﻿<#@ template language="C#" #>
-<#@ import namespace="System.Text" #>
-<#@ import namespace="System.Collections.Generic" #>
 <#@ assembly name="G:\DevEnvs\Unity\6000.0.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.CoreModule.dll" #>
-<#@ import namespace="UnityEngine" #>
 using Unity.Burst;
 using UnityEngine;
 

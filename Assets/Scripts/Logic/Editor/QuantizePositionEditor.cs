@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-public class QuantizePositionEditor : UnityEditor.Editor
+public class QuantizePositionEditor : Editor
 {
     [MenuItem("GameObject/Quantize", false, 10)]
     private static void QuantizePosition()

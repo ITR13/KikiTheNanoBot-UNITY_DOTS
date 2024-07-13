@@ -2,7 +2,6 @@ using Enums;
 using Unity.Entities;
 using Unity.Mathematics;
 
-
 namespace Data
 {
     public struct MultiPosition : IBufferElementData

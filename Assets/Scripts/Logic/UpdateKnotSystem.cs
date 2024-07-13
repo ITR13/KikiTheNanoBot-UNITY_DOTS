@@ -4,7 +4,7 @@ using Unity.Entities;
 
 [UpdateInGroup(typeof(ControlSystemGroup))]
 [UpdateBefore(typeof(PlayerControllerSystem))]
-partial struct UpdateKnotSystem : ISystem
+internal partial struct UpdateKnotSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
@@ -21,10 +21,7 @@ partial struct UpdateKnotSystem : ISystem
         foreach (var knot in SystemAPI.Query<DynamicBuffer<ClimbKnot>>())
         {
             var index = 1;
-            while (index < knot.Length && knot[index].Time < elapsedTime)
-            {
-                index++;
-            }
+            while (index < knot.Length && knot[index].Time < elapsedTime) index++;
 
             if (index <= 1) continue;
             index--;
@@ -35,10 +32,7 @@ partial struct UpdateKnotSystem : ISystem
         foreach (var knot in SystemAPI.Query<DynamicBuffer<RotateKnot>>())
         {
             var index = 1;
-            while (index < knot.Length && knot[index].Time < elapsedTime)
-            {
-                index++;
-            }
+            while (index < knot.Length && knot[index].Time < elapsedTime) index++;
 
             if (index <= 1) continue;
             index--;
@@ -50,10 +44,7 @@ partial struct UpdateKnotSystem : ISystem
         foreach (var knot in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<PushableTag>())
         {
             var index = 1;
-            while (index < knot.Length && knot[index].Time < elapsedTime)
-            {
-                index++;
-            }
+            while (index < knot.Length && knot[index].Time < elapsedTime) index++;
 
             if (index <= 1) continue;
             index--;

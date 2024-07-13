@@ -5,7 +5,7 @@ using Unity.Entities;
 [RequireMatchingQueriesForUpdate]
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor)]
-partial struct CleanupCellsSystem : ISystem
+internal partial struct CleanupCellsSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {

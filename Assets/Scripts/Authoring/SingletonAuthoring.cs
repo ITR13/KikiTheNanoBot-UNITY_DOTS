@@ -1,11 +1,9 @@
 using Data;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-class SingletonAuthoring : MonoBehaviour
+internal class SingletonAuthoring : MonoBehaviour
 {
     public InputActionAsset InputActionAsset;
 
@@ -15,7 +13,7 @@ class SingletonAuthoring : MonoBehaviour
 #endif
 }
 
-class SingletonAuthoringBaker : Baker<SingletonAuthoring>
+internal class SingletonAuthoringBaker : Baker<SingletonAuthoring>
 {
     public override void Bake(SingletonAuthoring authoring)
     {

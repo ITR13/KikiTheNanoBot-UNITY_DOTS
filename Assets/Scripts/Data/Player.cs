@@ -4,4 +4,3 @@ public struct Player : IComponentData
 {
     public float FallForwardDeadline;
 }
-

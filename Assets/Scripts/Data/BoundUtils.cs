@@ -8,14 +8,14 @@ namespace Data
     {
         public static int PositionToIndex(int3 bounds, int3 position)
         {
-            return ((position.z * bounds.y) + position.y) * bounds.x + position.x;
+            return (position.z * bounds.y + position.y) * bounds.x + position.x;
         }
 
         public static bool IsOutOfBounds(int3 bounds, int3 position)
         {
-            return math.any(position < 0 | position >= bounds);
+            return math.any((position < 0) | (position >= bounds));
         }
-        
+
         [BurstDiscard]
         public static void ThrowIfOutOfBounds(int3 bounds, int3 position)
         {
