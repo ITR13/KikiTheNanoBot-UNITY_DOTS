@@ -6,27 +6,30 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_EDITOR
-public class LevelDataAuthoring : MonoBehaviour
+namespace Authoring
 {
-    public List<SceneAsset> Levels;
-
-    private class Baker : Baker<LevelDataAuthoring>
+    public class LevelDataAuthoring : MonoBehaviour
     {
-        public override void Bake(LevelDataAuthoring authoring)
-        {
-            var entity = GetEntity(TransformUsageFlags.None);
-            AddComponent<LoadedLevel>(entity);
+        public List<SceneAsset> Levels;
 
-            var buffer = AddBuffer<LevelData>(entity);
-            foreach (var level in authoring.Levels)
+        private class Baker : Baker<LevelDataAuthoring>
+        {
+            public override void Bake(LevelDataAuthoring authoring)
             {
-                var reference = new EntitySceneReference(level);
-                buffer.Add(
-                    new LevelData
-                    {
-                        SceneReference = reference,
-                    }
-                );
+                var entity = GetEntity(TransformUsageFlags.None);
+                AddComponent<LoadedLevel>(entity);
+
+                var buffer = AddBuffer<LevelData>(entity);
+                foreach (var level in authoring.Levels)
+                {
+                    var reference = new EntitySceneReference(level);
+                    buffer.Add(
+                        new LevelData
+                        {
+                            SceneReference = reference,
+                        }
+                    );
+                }
             }
         }
     }

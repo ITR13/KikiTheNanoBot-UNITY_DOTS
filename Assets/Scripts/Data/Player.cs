@@ -1,6 +1,9 @@
 using Unity.Entities;
 
-public struct Player : IComponentData
+namespace Data
 {
-    public float FallForwardDeadline;
+    public struct Player : IComponentData
+    {
+        public float FallForwardDeadline;
+    }
 }

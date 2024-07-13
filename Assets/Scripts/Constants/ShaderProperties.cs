@@ -1,7 +1,7 @@
 ﻿using Unity.Burst;
 using UnityEngine;
 
-namespace Enums
+namespace Constants
 {
     public struct ShaderProperties
     {

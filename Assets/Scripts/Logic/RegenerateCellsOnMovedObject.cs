@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Data;
+using Unity.Entities;
 using Unity.Transforms;
 
 namespace Logic

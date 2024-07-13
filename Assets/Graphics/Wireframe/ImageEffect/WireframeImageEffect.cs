@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-namespace SuperSystems.ImageEffects
+namespace Graphics.Wireframe.ImageEffect
 {
 
 [ExecuteInEditMode]

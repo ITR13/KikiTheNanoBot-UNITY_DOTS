@@ -1,4 +1,4 @@
-using Enums;
+using Constants;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;

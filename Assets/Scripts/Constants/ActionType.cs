@@ -1,4 +1,4 @@
-﻿namespace Enums
+﻿namespace Constants
 {
     public enum ActionType
     {

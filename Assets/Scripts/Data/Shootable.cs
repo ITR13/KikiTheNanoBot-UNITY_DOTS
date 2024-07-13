@@ -1,5 +1,8 @@
 using Unity.Entities;
 
-public struct Shootable : IComponentData
+namespace Data
 {
+    public struct Shootable : IComponentData
+    {
+    }
 }

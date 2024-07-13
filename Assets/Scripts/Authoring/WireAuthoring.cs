@@ -2,14 +2,17 @@ using Data;
 using Unity.Entities;
 using UnityEngine;
 
-public class WireAuthoring : MonoBehaviour
+namespace Authoring
 {
-    public class WireAuthoringBaker : Baker<WireAuthoring>
+    public class WireAuthoring : MonoBehaviour
     {
-        public override void Bake(WireAuthoring authoring)
+        public class WireAuthoringBaker : Baker<WireAuthoring>
         {
-            var entity = GetEntity(TransformUsageFlags.Renderable);
-            AddComponent<WireTag>(entity);
+            public override void Bake(WireAuthoring authoring)
+            {
+                var entity = GetEntity(TransformUsageFlags.Renderable);
+                AddComponent<WireTag>(entity);
+            }
         }
     }
 }

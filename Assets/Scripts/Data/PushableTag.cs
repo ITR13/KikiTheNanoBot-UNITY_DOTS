@@ -1,5 +1,8 @@
 using Unity.Entities;
 
-public struct PushableTag : IComponentData
+namespace Data
 {
+    public struct PushableTag : IComponentData
+    {
+    }
 }

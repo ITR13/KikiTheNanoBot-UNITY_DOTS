@@ -1,3 +1,4 @@
+using Authoring;
 using UnityEditor;
 
 [CustomEditor(typeof(ObjectAuthoring))]

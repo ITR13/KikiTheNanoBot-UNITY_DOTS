@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Enums
+namespace Constants
 {
     [Flags]
     public enum Direction

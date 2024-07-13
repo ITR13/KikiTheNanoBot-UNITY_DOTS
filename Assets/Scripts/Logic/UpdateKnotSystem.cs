@@ -2,60 +2,63 @@ using Data;
 using Unity.Burst;
 using Unity.Entities;
 
-[UpdateInGroup(typeof(ControlSystemGroup))]
-[UpdateBefore(typeof(PlayerControllerSystem))]
-internal partial struct UpdateKnotSystem : ISystem
+namespace Logic
 {
-    public void OnCreate(ref SystemState state)
+    [UpdateInGroup(typeof(ControlSystemGroup))]
+    [UpdateBefore(typeof(PlayerControllerSystem))]
+    internal partial struct UpdateKnotSystem : ISystem
     {
-        state.RequireForUpdate<CellHolder>();
-    }
-
-    [BurstCompile]
-    public void OnUpdate(ref SystemState state)
-    {
-        var time = SystemAPI.Time;
-        var elapsedTime = (float)time.ElapsedTime;
-        state.CompleteDependency();
-
-        foreach (var knot in SystemAPI.Query<DynamicBuffer<ClimbKnot>>())
+        public void OnCreate(ref SystemState state)
         {
-            var index = 1;
-            while (index < knot.Length && knot[index].Time < elapsedTime) index++;
-
-            if (index <= 1) continue;
-            index--;
-
-            knot.RemoveRange(0, index);
+            state.RequireForUpdate<CellHolder>();
         }
 
-        foreach (var knot in SystemAPI.Query<DynamicBuffer<RotateKnot>>())
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
         {
-            var index = 1;
-            while (index < knot.Length && knot[index].Time < elapsedTime) index++;
+            var time = SystemAPI.Time;
+            var elapsedTime = (float)time.ElapsedTime;
+            state.CompleteDependency();
 
-            if (index <= 1) continue;
-            index--;
-
-            knot.RemoveRange(0, index);
-        }
-
-        ref var cellHolder = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
-        foreach (var knot in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<PushableTag>())
-        {
-            var index = 1;
-            while (index < knot.Length && knot[index].Time < elapsedTime) index++;
-
-            if (index <= 1) continue;
-            index--;
-
-            for (var i = 0; i < index; i++)
+            foreach (var knot in SystemAPI.Query<DynamicBuffer<ClimbKnot>>())
             {
-                cellHolder.SetPushable(knot[i].Position, Entity.Null);
-                cellHolder.SetSolid(knot[i].Position, false);
+                var index = 1;
+                while (index < knot.Length && knot[index].Time < elapsedTime) index++;
+
+                if (index <= 1) continue;
+                index--;
+
+                knot.RemoveRange(0, index);
             }
 
-            knot.RemoveRange(0, index);
+            foreach (var knot in SystemAPI.Query<DynamicBuffer<RotateKnot>>())
+            {
+                var index = 1;
+                while (index < knot.Length && knot[index].Time < elapsedTime) index++;
+
+                if (index <= 1) continue;
+                index--;
+
+                knot.RemoveRange(0, index);
+            }
+
+            ref var cellHolder = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
+            foreach (var knot in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<PushableTag>())
+            {
+                var index = 1;
+                while (index < knot.Length && knot[index].Time < elapsedTime) index++;
+
+                if (index <= 1) continue;
+                index--;
+
+                for (var i = 0; i < index; i++)
+                {
+                    cellHolder.SetPushable(knot[i].Position, Entity.Null);
+                    cellHolder.SetSolid(knot[i].Position, false);
+                }
+
+                knot.RemoveRange(0, index);
+            }
         }
     }
 }

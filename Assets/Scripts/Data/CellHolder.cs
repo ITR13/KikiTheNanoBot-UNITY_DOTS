@@ -1,27 +1,30 @@
-using Enums;
+using Constants;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
-public struct CellHolder : ICleanupComponentData
+namespace Data
 {
-    public int3 RoomBounds;
-    public int Volume;
-
-    public NativeBitArray SolidPositions;
-    public NativeArray<Entity> PushablePositions;
-
-    public NativeArray<Direction> Wires;
-    public NativeArray<int> WiresGroup;
-    public NativeBitArray PoweredGroups;
-    public int WireGroupCount;
-
-    public void Dispose()
+    public struct CellHolder : ICleanupComponentData
     {
-        SolidPositions.Dispose();
-        PushablePositions.Dispose();
-        Wires.Dispose();
-        WiresGroup.Dispose();
-        PoweredGroups.Dispose();
+        public int3 RoomBounds;
+        public int Volume;
+
+        public NativeBitArray SolidPositions;
+        public NativeArray<Entity> PushablePositions;
+
+        public NativeArray<Direction> Wires;
+        public NativeArray<int> WiresGroup;
+        public NativeBitArray PoweredGroups;
+        public int WireGroupCount;
+
+        public void Dispose()
+        {
+            SolidPositions.Dispose();
+            PushablePositions.Dispose();
+            Wires.Dispose();
+            WiresGroup.Dispose();
+            PoweredGroups.Dispose();
+        }
     }
 }
