@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using System.Linq;
+using Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -18,16 +19,18 @@ namespace Logic
 
         protected override void OnStartRunning()
         {
-            var actions = SystemAPI.GetSingleton<InputComponent>().InputActions.Value;
-            _move = actions.FindAction("Move");
-            _jump = actions.FindAction("Jump");
-            _push = actions.FindAction("Push");
-            _shoot = actions.FindAction("Shoot");
-            _look = actions.FindAction("Look");
+            var actionAsset = SystemAPI.GetSingleton<InputComponent>().InputActions.Value;
+            _move = actionAsset.FindAction("Move");
+            _jump = actionAsset.FindAction("Jump");
+            _push = actionAsset.FindAction("Push");
+            _shoot = actionAsset.FindAction("Shoot");
+            _look = actionAsset.FindAction("Look");
 
-            _reset = actions.FindAction("Reset");
-            _nextLevel = actions.FindAction("NextLevel");
-            _previousLevel = actions.FindAction("PreviousLevel");
+            _reset = actionAsset.FindAction("Reset");
+            _nextLevel = actionAsset.FindAction("NextLevel");
+            _previousLevel = actionAsset.FindAction("PreviousLevel");
+
+            actionAsset.FindActionMap("Player").Enable();
         }
 
         protected override void OnUpdate()
@@ -40,6 +43,13 @@ namespace Logic
             inputComponent.Push = ReadButton(_push);
             inputComponent.Shoot = ReadButton(_shoot);
             inputComponent.Look = new float2(_look.ReadValue<Vector2>());
+            var s = $"PUSH: Enabled: {_push.enabled}   {_push.actionMap.enabled}";
+            foreach (var binding in _push.bindings)
+            {
+                s += $"\n{binding.path}   {binding.name}\n{binding.action}";
+            }
+
+            Debug.Log(s);
 
             inputComponent.Reset = ReadButton(_reset);
             inputComponent.NextLevel = ReadButton(_nextLevel);

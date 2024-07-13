@@ -65,6 +65,7 @@ namespace Logic
 
         private void LoadLevel(ref SystemState state, LoadedLevel loadedLevel, int level)
         {
+            Debug.Log($"Loading level {level}");
             if (loadedLevel.Entity != Entity.Null)
             {
                 SceneSystem.UnloadScene(state.WorldUnmanaged, loadedLevel.Entity, SceneSystem.UnloadParameters.DestroyMetaEntities);
