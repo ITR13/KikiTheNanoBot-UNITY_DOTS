@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Data;
+﻿using Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -43,13 +42,6 @@ namespace Logic
             inputComponent.Push = ReadButton(_push);
             inputComponent.Shoot = ReadButton(_shoot);
             inputComponent.Look = new float2(_look.ReadValue<Vector2>());
-            var s = $"PUSH: Enabled: {_push.enabled}   {_push.actionMap.enabled}";
-            foreach (var binding in _push.bindings)
-            {
-                s += $"\n{binding.path}   {binding.name}\n{binding.action}";
-            }
-
-            Debug.Log(s);
 
             inputComponent.Reset = ReadButton(_reset);
             inputComponent.NextLevel = ReadButton(_nextLevel);
