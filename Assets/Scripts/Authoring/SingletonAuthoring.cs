@@ -32,7 +32,7 @@ namespace Authoring
                 }
             );
 
-            AddComponent<VariableHolder>(entity, new VariableHolder { VariableGroup = authoring.Variables });
+            // AddComponent<VariableHolder>(entity, new VariableHolder { VariableGroup = authoring.Variables });
 
 #if UNITY_EDITOR
             AddComponent(

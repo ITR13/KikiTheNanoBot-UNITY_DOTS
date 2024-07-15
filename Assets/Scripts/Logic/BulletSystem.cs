@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Logic
 {
     [UpdateInGroup(typeof(ControlSystemGroup))]
-    [UpdateBefore(typeof(ShootSystem))]
+    [UpdateAfter(typeof(ShootSystem))]
     public partial struct BulletSystem : ISystem
     {
         public void OnCreate(ref SystemState state)

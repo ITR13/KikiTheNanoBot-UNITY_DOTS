@@ -1,5 +1,5 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <engine:VisualElement style="flex-grow: 0; flex-direction: row; background-color: rgba(255, 255, 255, 0.5); height: 30px;">
+    <engine:VisualElement data-source="project://database/Assets/UI%20Toolkit/Variables.asset?fileID=11400000&amp;guid=5f14a1a24e3ec6b46b11d6389f5f9733&amp;type=2#Variables" style="flex-grow: 0; flex-direction: row; background-color: rgba(255, 255, 255, 0.5); height: 30px;">
         <engine:Label text="Hello ${LevelName}" data-source="project://database/Assets/UI%20Toolkit/Variables.asset?fileID=11400000&amp;guid=5f14a1a24e3ec6b46b11d6389f5f9733&amp;type=2#Variables" enable-rich-text="true" style="-unity-font-definition: url(&quot;project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=2230732570650464555&amp;guid=5e1c590215cef4c4ba41f9ca88cf4fe5&amp;type=3#NotInter-Regular&quot;); background-color: rgba(255, 255, 255, 0.47); width: 102px;">
             <Bindings>
                 <engine:DataBinding property="text" data-source-path="m_Variables[0].variable.m_Value" binding-mode="ToTarget" />

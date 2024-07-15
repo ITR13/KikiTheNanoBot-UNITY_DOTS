@@ -87,7 +87,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "PreviousLook",
+                    "name": "<color=#FFFFFFFF><mark=#3169ACAB></mark>PreviousLook</color>",
                     "type": "Button",
                     "id": "e4fb4d0b-9987-4ffd-a7c7-7887c8cf1c3d",
                     "expectedControlType": "",
@@ -522,7 +522,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PreviousLook",
+                    "action": "<color=#FFFFFFFF><mark=#3169ACAB></mark>PreviousLook</color>",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -533,7 +533,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PreviousLook",
+                    "action": "<color=#FFFFFFFF><mark=#3169ACAB></mark>PreviousLook</color>",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

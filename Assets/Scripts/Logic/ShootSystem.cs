@@ -45,7 +45,7 @@ namespace Logic
             Rotate(time, rotateKnots, ref localTransform);
 
             var forward = math.forward(localTransform.Rotation);
-            localTransform.Position += forward * 0.5f;
+            localTransform.Position += forward * 0.65f;
 
             SystemAPI.SetComponent(bullet, localTransform);
             SystemAPI.SetComponent(
