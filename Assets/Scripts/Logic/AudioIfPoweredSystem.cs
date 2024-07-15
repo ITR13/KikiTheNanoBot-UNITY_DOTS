@@ -94,7 +94,6 @@ namespace Logic
                 foreach (var (clip, entity) in toPlay)
                 {
                     var audioSource = SystemAPI.ManagedAPI.GetComponent<AudioSource>(entity);
-                    Debug.Log($"Playing audioclip {clip.Value.name}");
                     audioSource.PlayOneShot(clip);
                 }
 

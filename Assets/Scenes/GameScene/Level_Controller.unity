@@ -129,6 +129,7 @@ GameObject:
   - component: {fileID: 488302452}
   - component: {fileID: 488302453}
   - component: {fileID: 488302454}
+  - component: {fileID: 488302455}
   m_Layer: 0
   m_Name: Singleton
   m_TagString: Untagged
@@ -173,6 +174,20 @@ MonoBehaviour:
   - {fileID: 102900000, guid: e7031a1c7bf576e4f8bdcf336dd5f834, type: 3}
   - {fileID: 102900000, guid: 28e053a95d0664741b07c19f88350040, type: 3}
   - {fileID: 102900000, guid: 02a7d50da3fdd794fa83781d45634654, type: 3}
+  - {fileID: 102900000, guid: 82b6e1bdf19131247af8157abf0869ff, type: 3}
+  LevelNames:
+  - Start
+  - Steps
+  - Move
+  - Electro
+  - Throw
+  - Gold
+  - Jump
+  - Escape
+  - Gears
+  - Cube
+  - Lorem Ipsum
+  LevelMoves: 0d000000050000000b000000160000001f0000000e00000011000000160000002c0000000800000000000000
 --- !u!114 &488302454
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,8 +201,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InputActionAsset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  Variables: {fileID: 11400000, guid: 5f14a1a24e3ec6b46b11d6389f5f9733, type: 2}
   DebugMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   DebugMaterial: {fileID: 2100000, guid: 6b6be9d3234bcf74fa3670db364ae9e3, type: 2}
+--- !u!114 &488302455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 488302451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b9a780856a2479bb7f490b1487cebd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 1424327118984408569, guid: 815593505242374449b3afa879fdf70f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

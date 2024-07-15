@@ -53,6 +53,7 @@ MonoBehaviour:
   MoveAudio: {fileID: 1781992815082733441, guid: c81ed00e9959a3349bf62b69a48b6f6a, type: 3}
   PushAudio: {fileID: 1781992815082733441, guid: 443f7057da9f98746991dfd73fbf0040, type: 3}
   JumpAudio: {fileID: 1781992815082733441, guid: 5a891a0d56948854f9cf2cf381d5dad6, type: 3}
+  GoalAudio: {fileID: 1781992815082733441, guid: 19ad8486d93325d4da79262836fdff11, type: 3}
   LandAudio: {fileID: 1781992815082733441, guid: 6699a373644c2884383cff6c7612f6b0, type: 3}
 --- !u!33 &1216662742793496070
 MeshFilter:

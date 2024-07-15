@@ -7,6 +7,9 @@ namespace Data
         public float FallForwardDeadline;
         public Entity BulletPrefab;
 
-        public Entity MoveAudio, PushAudio, JumpAudio;
+        public Entity MoveAudio, PushAudio, JumpAudio, GoalAudio;
+
+
+        public int Moves;
     }
 }

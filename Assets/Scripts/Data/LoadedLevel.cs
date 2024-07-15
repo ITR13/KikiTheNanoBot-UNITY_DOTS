@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 
 namespace Data
 {
@@ -6,5 +7,8 @@ namespace Data
     {
         public int CurrentLevelIndex;
         public Entity Entity;
+
+        public int ExpectedMoves;
+        public FixedString32Bytes Name;
     }
 }

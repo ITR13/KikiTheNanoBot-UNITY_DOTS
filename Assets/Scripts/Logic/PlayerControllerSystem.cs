@@ -4,7 +4,6 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 namespace Logic
 {
@@ -12,6 +11,11 @@ namespace Logic
     [UpdateBefore(typeof(FallSystem))]
     internal partial struct PlayerControllerSystem : ISystem
     {
+        private const float JumpTime = 0.2f;
+        private const float MoveTime = 0.2f;
+        private const float ClimbUpTime = 0.5f;
+        
+        
         // I'm lazy, sue me
         private bool _hasJumped;
 
@@ -60,12 +64,18 @@ namespace Logic
             if (goal.Active && math.all(lastPosition == goal.Position))
             {
                 SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
-                if (goal.WinAtTime > time + 1)
-                {
-                    goal.WinAtTime = time + 1;
-                    SystemAPI.SetSingleton(goal);
-                }
-
+                if (!(goal.WinAtTime > time + 1)) return;
+                goal.WinAtTime = time + 1;
+                SystemAPI.SetSingleton(goal);
+                    
+                var audio = state.EntityManager.Instantiate(playerComponent.GoalAudio);
+                SystemAPI.SetComponent(
+                    audio,
+                    new LocalToWorld
+                    {
+                        Value = float4x4.Translate(lastPosition),
+                    }
+                );
                 return;
             }
 
@@ -97,7 +107,6 @@ namespace Logic
                 didMove |= didRotate;
             }
 
-
             if (didPush)
             {
                 var audio = state.EntityManager.Instantiate(playerComponent.PushAudio);
@@ -105,7 +114,7 @@ namespace Logic
                     audio,
                     new LocalToWorld
                     {
-                        Value = float4x4.Translate(lastPosition)
+                        Value = float4x4.Translate(lastPosition),
                     }
                 );
             }
@@ -117,7 +126,7 @@ namespace Logic
                     audio,
                     new LocalToWorld
                     {
-                        Value = float4x4.Translate(lastPosition)
+                        Value = float4x4.Translate(lastPosition),
                     }
                 );
             }
@@ -128,7 +137,7 @@ namespace Logic
                     audio,
                     new LocalToWorld
                     {
-                        Value = float4x4.Translate(lastPosition)
+                        Value = float4x4.Translate(lastPosition),
                     }
                 );
             }
@@ -225,6 +234,8 @@ namespace Logic
 
                 HandlePlayerCells(playerEntity, multiPositions, aboveIsOwn, jumpPositionI, ref cells);
                 QueueJump(ref state, time, multiPositions, climbKnots, jumpPositionI, lastKnot, ClimbFlags.Jump);
+                player.Moves += 1;
+                SystemAPI.SetComponent(playerEntity, player);
                 return;
             }
 
@@ -238,9 +249,11 @@ namespace Logic
                 var flags = jumpUpInstead ? ClimbFlags.Jump : ClimbFlags.JumpForward;
                 if (!jumpUpInstead)
                 {
-                    player.FallForwardDeadline = time + 0.12f + StructConstants.CoyoteTime;
-                    SystemAPI.SetComponent(playerEntity, player);
+                    player.FallForwardDeadline = time + JumpTime + StructConstants.CoyoteTime;
+                    player.Moves += 1;
                 }
+                player.Moves += 1;
+                SystemAPI.SetComponent(playerEntity, player);
 
                 HandlePlayerCells(playerEntity, multiPositions, isOwn, destination, ref cells);
                 QueueJump(ref state, time, multiPositions, climbKnots, destination, lastKnot, flags);
@@ -307,6 +320,8 @@ namespace Logic
                 );
                 didMove = true;
                 SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
+                player.Moves += 1;
+                SystemAPI.SetComponent(playerEntity, player);
                 return;
             }
 
@@ -339,6 +354,8 @@ namespace Logic
                     down
                 );
                 SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
+                player.Moves += 1;
+                SystemAPI.SetComponent(playerEntity, player);
             }
         }
 
@@ -353,7 +370,7 @@ namespace Logic
         {
             var left = math.round(math.mul(rotation, new float3(-1, 0, 0)));
             var climbUpRotation = quaternion.AxisAngle(left, math.PIHALF * multiplier);
-            var endTime = time + 0.2f;
+            var endTime = time + MoveTime;
             climbKnots.Add(
                 new ClimbKnot
                 {
@@ -393,7 +410,7 @@ namespace Logic
             float3 down
         )
         {
-            var endTime = time + 0.5f;
+            var endTime = time + ClimbUpTime;
             var lastMultiPosition = multiPositions[^1];
             lastMultiPosition.Time = endTime;
             multiPositions[^1] = lastMultiPosition;
@@ -419,8 +436,8 @@ namespace Logic
             var climbDownRotation = quaternion.AxisAngle(right, math.PIHALF * multiplier);
             var endRotation = math.mul(climbDownRotation, lastKnot.Rotation);
 
-            var part1Time = time + 0.2f * 0.5f;
-            var part2Time = time + 0.8f * 0.5f;
+            var part1Time = time + 0.2f * ClimbUpTime;
+            var part2Time = time + 0.8f * ClimbUpTime;
 
             climbKnots.Add(
                 new ClimbKnot
@@ -513,7 +530,7 @@ namespace Logic
             float multiplier
         )
         {
-            var endTime = time + 0.2f;
+            var endTime = time + MoveTime;
             var lastMultiPosition = multiPositions[^1];
             lastMultiPosition.Time = endTime;
             multiPositions[^1] = lastMultiPosition;
@@ -590,7 +607,7 @@ namespace Logic
                 lastPushableKnot.Time = time;
                 pushableClimbKnot.Add(lastPushableKnot);
 
-                var blockTime = time + 0.2f;
+                var blockTime = time + MoveTime;
                 pushableClimbKnot.Add(
                     new ClimbKnot
                     {
@@ -638,7 +655,7 @@ namespace Logic
             ClimbFlags flags
         )
         {
-            var jumpTime = time + 0.12f;
+            var jumpTime = time + JumpTime;
             climbKnots.Add(
                 new ClimbKnot
                 {
@@ -691,7 +708,7 @@ namespace Logic
 
             var rotation = quaternion.AxisAngle(new float3(0, 1, 0), math.PIHALF * multiplier);
 
-            var endTime = time + 0.2f;
+            var endTime = time + MoveTime;
             rotateKnots.Add(
                 new RotateKnot
                 {

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using Data;
 using Unity.Entities;
@@ -5,12 +6,27 @@ using Unity.Entities.Serialization;
 using UnityEditor;
 using UnityEngine;
 
-#if UNITY_EDITOR
 namespace Authoring
 {
+    [ExecuteAlways]
     public class LevelDataAuthoring : MonoBehaviour
     {
         public List<SceneAsset> Levels;
+        public List<string> LevelNames;
+        public List<int> LevelMoves;
+
+        public void Update()
+        {
+            while (LevelNames.Count < Levels.Count)
+            {
+                LevelNames.Add("Lorem Ipsum");
+            }
+
+            while (LevelMoves.Count < Levels.Count)
+            {
+                LevelMoves.Add(0);
+            }
+        }
 
         private class Baker : Baker<LevelDataAuthoring>
         {
@@ -27,13 +43,19 @@ namespace Authoring
                 );
 
                 var buffer = AddBuffer<LevelData>(entity);
-                foreach (var level in authoring.Levels)
+                for (var index = 0; index < authoring.Levels.Count; index++)
                 {
+                    var level = authoring.Levels[index];
+                    var name = authoring.LevelNames[index];
+                    var moves = authoring.LevelMoves[index];
+
                     var reference = new EntitySceneReference(level);
                     buffer.Add(
                         new LevelData
                         {
                             SceneReference = reference,
+                            ExpectedMoves = moves,
+                            LevelName = name,
                         }
                     );
                 }

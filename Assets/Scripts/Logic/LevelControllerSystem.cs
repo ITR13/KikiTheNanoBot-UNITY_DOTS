@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Logic
 {
-    public partial struct LoadNextSceneAuthoring : ISystem
+    public partial struct LevelControllerSystem : ISystem
     {
         private double _forceDelay;
 
@@ -68,7 +68,11 @@ namespace Logic
             Debug.Log($"Loading level {level}");
             if (loadedLevel.Entity != Entity.Null)
             {
-                SceneSystem.UnloadScene(state.WorldUnmanaged, loadedLevel.Entity, SceneSystem.UnloadParameters.DestroyMetaEntities);
+                SceneSystem.UnloadScene(
+                    state.WorldUnmanaged,
+                    loadedLevel.Entity,
+                    SceneSystem.UnloadParameters.DestroyMetaEntities
+                );
                 SystemAPI.SetSingleton(
                     new LoadedLevel { Entity = Entity.Null, CurrentLevelIndex = loadedLevel.CurrentLevelIndex }
                 );
@@ -76,7 +80,9 @@ namespace Logic
 
             var levels = SystemAPI.GetSingletonBuffer<LevelData>();
             level = math.clamp(level, 0, levels.Length - 1);
-            var nextScene = levels[level].SceneReference;
+
+            var levelData = levels[level];
+            var nextScene = levelData.SceneReference;
 
             var sceneEntity = SceneSystem.LoadSceneAsync(
                 state.WorldUnmanaged,
@@ -89,7 +95,11 @@ namespace Logic
                 }
             );
             SystemAPI.SetSingleton(
-                new LoadedLevel { Entity = sceneEntity, CurrentLevelIndex = level }
+                new LoadedLevel
+                {
+                    Entity = sceneEntity, CurrentLevelIndex = level, ExpectedMoves = levelData.ExpectedMoves,
+                    Name = levelData.LevelName
+                }
             );
         }
     }

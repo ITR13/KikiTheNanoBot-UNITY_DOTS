@@ -18,5 +18,6 @@ namespace Data
         public ButtonState Jump, Push, Shoot;
         public float2 Look;
         public ButtonState Reset, NextLevel, PreviousLevel;
+        public ButtonState NextLook, PreviousLook;
     }
 }

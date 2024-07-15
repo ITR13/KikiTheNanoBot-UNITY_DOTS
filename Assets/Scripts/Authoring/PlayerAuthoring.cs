@@ -10,7 +10,7 @@ namespace Authoring
     {
         public GameObject Bullet;
 
-        public AudioOneShotAuthoring MoveAudio, PushAudio, JumpAudio;
+        public AudioOneShotAuthoring MoveAudio, PushAudio, JumpAudio, GoalAudio;
         public AudioOneShotAuthoring LandAudio;
     }
 
@@ -26,9 +26,10 @@ namespace Authoring
                     BulletPrefab = GetEntity(authoring.Bullet, TransformUsageFlags.Renderable),
                     FallForwardDeadline = float.NegativeInfinity,
 
-                    JumpAudio = GetEntity(authoring.LandAudio, TransformUsageFlags.None),
+                    JumpAudio = GetEntity(authoring.JumpAudio, TransformUsageFlags.None),
                     PushAudio = GetEntity(authoring.PushAudio, TransformUsageFlags.None),
                     MoveAudio = GetEntity(authoring.MoveAudio, TransformUsageFlags.None),
+                    GoalAudio = GetEntity(authoring.GoalAudio, TransformUsageFlags.None),
                 }
             );
             AddComponent<PushableTag>(entity);
