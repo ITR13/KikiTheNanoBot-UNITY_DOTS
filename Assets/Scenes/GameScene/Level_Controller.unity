@@ -174,7 +174,13 @@ MonoBehaviour:
   - {fileID: 102900000, guid: e7031a1c7bf576e4f8bdcf336dd5f834, type: 3}
   - {fileID: 102900000, guid: 28e053a95d0664741b07c19f88350040, type: 3}
   - {fileID: 102900000, guid: 02a7d50da3fdd794fa83781d45634654, type: 3}
+  - {fileID: 102900000, guid: 32c2808bb4634944d90bec7a1639c8a4, type: 3}
   - {fileID: 102900000, guid: 82b6e1bdf19131247af8157abf0869ff, type: 3}
+  - {fileID: 102900000, guid: 05174e321c5979244a09ed68bb21f0b1, type: 3}
+  - {fileID: 102900000, guid: 0bf4eaa4b5f0af24793a86967406c324, type: 3}
+  - {fileID: 102900000, guid: a6571849caef19444a94e231b7c97133, type: 3}
+  - {fileID: 102900000, guid: be10b3240109ce24eb19ea553fb6314d, type: 3}
+  - {fileID: 102900000, guid: 016b744dcdd71ec4091a1c6fead20fff, type: 3}
   LevelNames:
   - Start
   - Steps
@@ -185,9 +191,14 @@ MonoBehaviour:
   - Jump
   - Escape
   - Gears
+  - Gamma
   - Cube
-  - Lorem Ipsum
-  LevelMoves: 0d000000050000000b000000160000001f0000000e00000011000000160000002c0000000800000000000000
+  - Mini
+  - Maze
+  - Towers
+  - Edge
+  - Nice
+  LevelMoves: 0d000000050000000b000000160000001f0000000e00000011000000160000002c0000001400000008000000170000001200000012000000280000000d000000
 --- !u!114 &488302454
 MonoBehaviour:
   m_ObjectHideFlags: 0
