@@ -1,7 +1,6 @@
 # KIKI THE NANO BOT
 Rewritten in Unity Dots.
 
-
 ## Thanks and Credits
 "kiki the nanobot" was originally developed by monsterkodi. You can read about and download the original game here: https://kiki.sourceforge.net/
 This version uses levels and assets from the original game. You can read the full list of thanks here: https://kiki.sourceforge.net/misc/thanks.html
@@ -23,6 +22,9 @@ The primary goal was to test my skills as well as showcase some techniques so ot
 - A level loader- The original game uses python to make it easy for anyone to create and edit levels. I instead had each level be set up as a SubScene, which had some advantages, but is less accessible for the end user.
 - Switches being allowed to freely hook up to any functionality instead of just activating the goal when all are active. (None of the levels I saw ever used this extended functionality for any gameplay)
 
+## How to run
+The game can be downloaded from the [itch.io page](https://itr.itch.io/kiki), which also has instructions on how to play the game.
+You can also download the project and open it with Unity 6000.0.9f1 then run it from the "GameScene".
 
 ## Technology and Techniques
 The project is written almost entirely with entities, the two exceptions being the camera that's spawned from an entity, and the UI that isn't spawned from an entity. The project barely uses any jobs due to having a low amount of entities, and instead uses DOTS and ECS as a way to structure the project and make it more modular. Almost all code is burst compiled.
@@ -70,6 +72,7 @@ Before setting up graphics with meshes and stuff I mostly used Debug.DrawLine an
 It would be nice with something like Gizmos that's ecs compatible, since it's a bother to find a mesh & shader for basic wireframe shapes when I just want something that I can draw over everything. Probably could just set up a package with it myself though, so not something that I think is urgent for the Unity team to fix.
 
 Afterwards I swapped over to entity graphics with the Keyframe system mentioned above. There's also some systems like BulletRenderSystem that instead has a start and forward position to decide the resulting position.
+The original game had everything hard-coded as OpenGL calls, so I reverse-engineered how it worked and wrote a python script to convert them to obj files. I also remade some of them by hand.
 
 ### Gears, Wires, Switches, and Power
 Gears and Wires are primarly controlled by InitializeCellsSystem and GearAndWireSystem, which do a series of Depth First Searches to find out what's getting powered by what. After that there's a few different systems reading the affected cells:
@@ -85,6 +88,8 @@ I couldn't find away to deal with audio in unmanaged code, so I handled it in tw
 - Creating a list of audio to play then having a managed system that reads the list later and plays the audio clips.
 - Spawning entities with AudioSources that have PlayOnAwake on them.
 For the latter I also had a system that delete the entities if they're done playing.
+
+All the audio files are taken from the original game.
 
 ### Misc & Others
 **The Camera** worked as an entity in editor, but once I made a build it was just black, so I had to spawn it from an entity instead (Or just have it in the scene). The UI also worked in editor but not in build.
