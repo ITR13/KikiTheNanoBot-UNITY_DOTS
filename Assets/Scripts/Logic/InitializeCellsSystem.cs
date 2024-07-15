@@ -5,6 +5,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 using static Data.BoundUtils;
 
 namespace Logic
@@ -36,55 +37,68 @@ namespace Logic
             var pushableEntities = pushableQuery.ToEntityArray(state.WorldUpdateAllocator);
             var pushablePositions = pushableTransforms.AsReadOnly().ToPositionArray(state.WorldUpdateAllocator);
 
-            var wireQuery = SystemAPI.QueryBuilder().WithAll<LocalToWorld, WireTag>().Build();
+            var wireQuery = SystemAPI.QueryBuilder().WithAll<LocalToWorld, Wire>().Build();
             var wireTransforms = wireQuery.ToComponentDataArray<LocalToWorld>(state.WorldUpdateAllocator);
+            var wireEntities = wireQuery.ToEntityArray(state.WorldUpdateAllocator);
             var (wirePositions, wireDirections) = LtwToWires(ref state, wireTransforms);
 
-            foreach (var (room, entity) in SystemAPI.Query<Room>().WithAbsent<CellHolder>().WithEntityAccess())
-            {
-                var roomVolume = room.Bounds.x * room.Bounds.y * room.Bounds.z;
-                var pushable = new NativeArray<Entity>(roomVolume, Allocator.Persistent);
-                var solid = new NativeBitArray(roomVolume, Allocator.Persistent);
+            var roomQuery = SystemAPI.QueryBuilder().WithAll<Room>().WithAbsent<CellHolder>().Build();
+            var entity = roomQuery.GetSingletonEntity();
+            var room = SystemAPI.GetComponent<Room>(entity);
 
-                var wires = new NativeArray<Direction>(roomVolume, Allocator.Persistent);
-                var wireGroups = new NativeArray<int>(
-                    roomVolume,
-                    Allocator.Persistent,
-                    NativeArrayOptions.UninitializedMemory
-                );
-                for (var i = 0; i < wireGroups.Length; i++) wireGroups[i] = -1;
+            var roomVolume = room.Bounds.x * room.Bounds.y * room.Bounds.z;
+            var pushable = new NativeArray<Entity>(roomVolume, Allocator.Persistent);
+            var solid = new NativeBitArray(roomVolume, Allocator.Persistent);
 
-                var cellHolder =
-                    new CellHolder
-                    {
-                        RoomBounds = room.Bounds,
-                        Volume = roomVolume,
-                        PushablePositions = pushable,
-                        SolidPositions = solid,
-                        Wires = wires,
-                        WiresGroup = wireGroups,
-                    };
+            var wires = new NativeArray<Direction>(roomVolume, Allocator.Persistent);
+            var wireGroups = new NativeArray<int>(
+                roomVolume,
+                Allocator.Persistent,
+                NativeArrayOptions.UninitializedMemory
+            );
+            for (var i = 0; i < wireGroups.Length; i++) wireGroups[i] = -1;
 
-                foreach (var solidPosition in solidPositions) cellHolder.SetSolid(solidPosition, true);
-
-                for (var i = 0; i < pushablePositions.Length; i++)
-                    cellHolder.SetPushable(pushablePositions[i], pushableEntities[i]);
-
-                for (var i = 0; i < wirePositions.Length; i++)
+            var cellHolder =
+                new CellHolder
                 {
-                    ThrowIfOutOfBounds(cellHolder.RoomBounds, wirePositions[i]);
-                    var index = PositionToIndex(cellHolder.RoomBounds, wirePositions[i]);
-                    wires[index] |= wireDirections[i];
-                }
+                    RoomBounds = room.Bounds,
+                    Volume = roomVolume,
+                    PushablePositions = pushable,
+                    SolidPositions = solid,
+                    Wires = wires,
+                    WiresGroup = wireGroups,
+                };
 
-                var groupCount = 0;
-                for (var i = 0; i < wirePositions.Length; i++) WireDfs(ref cellHolder, ref groupCount, wirePositions[i]);
+            foreach (var solidPosition in solidPositions) cellHolder.SetSolid(solidPosition, true);
 
-                cellHolder.WireGroupCount = groupCount;
-                cellHolder.PoweredGroups = new NativeBitArray(groupCount, Allocator.Persistent);
+            for (var i = 0; i < pushablePositions.Length; i++)
+                cellHolder.SetPushable(pushablePositions[i], pushableEntities[i]);
 
+            for (var i = 0; i < wirePositions.Length; i++)
+            {
+                ThrowIfOutOfBounds(cellHolder.RoomBounds, wirePositions[i]);
+                var index = PositionToIndex(cellHolder.RoomBounds, wirePositions[i]);
+                wires[index] |= wireDirections[i];
+            }
 
-                ecb.AddComponent(entity, cellHolder);
+            var groupCount = 0;
+            for (var i = 0; i < wirePositions.Length; i++) WireDfs(ref cellHolder, ref groupCount, wirePositions[i]);
+
+            cellHolder.WireGroupCount = groupCount;
+            cellHolder.PoweredGroups = new NativeBitArray(groupCount, Allocator.Persistent);
+
+            ecb.AddComponent(entity, cellHolder);
+
+            for (var i = 0; i < wirePositions.Length; i++)
+            {
+                cellHolder.GetWire(wirePositions[i], out _, out var group);
+                ecb.SetComponent(
+                    wireEntities[i],
+                    new Wire
+                    {
+                        Group = group
+                    }
+                );
             }
         }
 

@@ -11,7 +11,7 @@ namespace Authoring
             public override void Bake(WireAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.Renderable);
-                AddComponent<WireTag>(entity);
+                AddComponent<Wire>(entity);
             }
         }
     }

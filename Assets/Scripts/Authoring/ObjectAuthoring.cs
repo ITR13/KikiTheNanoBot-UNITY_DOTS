@@ -18,12 +18,14 @@ namespace Authoring
 
         public bool Shootable;
 
+        public AudioOneShotAuthoring LandAudio;
+
         public class ObjectAuthoringBaker : Baker<ObjectAuthoring>
         {
             public override void Bake(ObjectAuthoring authoring)
             {
                 var transformUsageFlags =
-                    authoring.Pushable ? TransformUsageFlags.Dynamic : TransformUsageFlags.Renderable;
+                    authoring.Pushable || authoring.Gear ? TransformUsageFlags.Dynamic : TransformUsageFlags.Renderable;
 
                 var entity = GetEntity(transformUsageFlags);
 
@@ -56,10 +58,7 @@ namespace Authoring
                     AddComponent<Gear>(entity);
                     AddComponent(
                         entity,
-                        new GearSpeed
-                        {
-                            Speed = ((positionI.x + positionI.z) & 1) * 2 - 1,
-                        }
+                        new GearRotation { }
                     );
                 }
 
@@ -85,6 +84,14 @@ namespace Authoring
 
                 AddComponent<Fall>(entity);
                 SetComponentEnabled<Fall>(entity, false);
+
+                AddComponent(
+                    entity,
+                    new OneShotAudioReference
+                    {
+                        Entity = GetEntity(authoring.LandAudio, TransformUsageFlags.None),
+                    }
+                );
             }
         }
     }

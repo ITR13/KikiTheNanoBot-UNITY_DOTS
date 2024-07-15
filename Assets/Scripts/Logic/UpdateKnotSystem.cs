@@ -41,6 +41,17 @@ namespace Logic
                 knot.RemoveRange(0, index);
             }
 
+            foreach (var knot in SystemAPI.Query<DynamicBuffer<WheelKnot>>())
+            {
+                var index = 1;
+                while (index < knot.Length && knot[index].Time < elapsedTime) index++;
+
+                if (index <= 1) continue;
+                index--;
+
+                knot.RemoveRange(0, index);
+            }
+
             ref var cellHolder = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
             foreach (var knot in SystemAPI.Query<DynamicBuffer<MultiPosition>>().WithAll<PushableTag>())
             {

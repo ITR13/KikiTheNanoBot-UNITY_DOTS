@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 namespace Logic
 {
@@ -30,12 +31,16 @@ namespace Logic
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
             state.RequireForUpdate<CellHolder>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
+                .CreateCommandBuffer(state.WorldUnmanaged);
+
             ref var cells = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
             var time = (float)SystemAPI.Time.ElapsedTime;
 
@@ -71,7 +76,20 @@ namespace Logic
 
                 if (cells.IsSolid(nextPosition))
                 {
-                    faller.EnabledRef.ValueRW = true;
+                    faller.EnabledRef.ValueRW = false;
+                    if (SystemAPI.HasComponent<OneShotAudioReference>(faller.Entity))
+                    {
+                        var reference = SystemAPI.GetComponent<OneShotAudioReference>(faller.Entity);
+                        var audio = ecb.Instantiate(reference.Entity);
+                        ecb.SetComponent(
+                            audio,
+                            new LocalToWorld
+                            {
+                                Value = float4x4.Translate(currentPosition),
+                            }
+                        );
+                    }
+
                     continue;
                 }
 

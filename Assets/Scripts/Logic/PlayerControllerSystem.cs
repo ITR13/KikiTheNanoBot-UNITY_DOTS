@@ -3,6 +3,7 @@ using Data;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace Logic
@@ -47,15 +48,18 @@ namespace Logic
             bool jumpReleased
         )
         {
-            var player = SystemAPI.GetSingletonEntity<Player>();
+            var playerEntity = SystemAPI.GetSingletonEntity<Player>();
+            var playerComponent = SystemAPI.GetComponent<Player>(playerEntity);
             var goal = SystemAPI.GetSingleton<Goal>();
-            var multiPositions = SystemAPI.GetBuffer<MultiPosition>(player);
+            var multiPositions = SystemAPI.GetBuffer<MultiPosition>(playerEntity);
+
+            var lastPosition = multiPositions[^1].Position;
 
             var time = (float)SystemAPI.Time.ElapsedTime;
 
-            if (goal.Active && math.all(multiPositions[^1].Position == goal.Position))
+            if (goal.Active && math.all(lastPosition == goal.Position))
             {
-                SystemAPI.SetComponentEnabled<Fall>(player, false);
+                SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
                 if (goal.WinAtTime > time + 1)
                 {
                     goal.WinAtTime = time + 1;
@@ -66,23 +70,68 @@ namespace Logic
             }
 
 
-            var climbKnots = SystemAPI.GetBuffer<ClimbKnot>(player);
-            var rotateKnots = SystemAPI.GetBuffer<RotateKnot>(player);
+            var climbKnots = SystemAPI.GetBuffer<ClimbKnot>(playerEntity);
+            var rotateKnots = SystemAPI.GetBuffer<RotateKnot>(playerEntity);
+            var wheelKnots = SystemAPI.GetBuffer<WheelKnot>(playerEntity);
 
             Climb(
                 ref state,
                 time,
-                player,
+                playerEntity,
                 multiPositions,
                 climbKnots,
                 rotateKnots,
+                wheelKnots,
                 math.sign(direction.y),
                 push,
                 jumpHeld,
-                jumpReleased
+                jumpReleased,
+                out var didMove,
+                out var didJump,
+                out var didPush
             );
 
-            if (direction.x != 0) Rotate(ref state, time, rotateKnots, math.sign(direction.x));
+            if (direction.x != 0)
+            {
+                Rotate(ref state, time, rotateKnots, wheelKnots, math.sign(direction.x), out var didRotate);
+                didMove |= didRotate;
+            }
+
+
+            if (didPush)
+            {
+                var audio = state.EntityManager.Instantiate(playerComponent.PushAudio);
+                SystemAPI.SetComponent(
+                    audio,
+                    new LocalToWorld
+                    {
+                        Value = float4x4.Translate(lastPosition)
+                    }
+                );
+            }
+
+            if (didJump)
+            {
+                var audio = state.EntityManager.Instantiate(playerComponent.JumpAudio);
+                SystemAPI.SetComponent(
+                    audio,
+                    new LocalToWorld
+                    {
+                        Value = float4x4.Translate(lastPosition)
+                    }
+                );
+            }
+            else if (didMove)
+            {
+                var audio = state.EntityManager.Instantiate(playerComponent.MoveAudio);
+                SystemAPI.SetComponent(
+                    audio,
+                    new LocalToWorld
+                    {
+                        Value = float4x4.Translate(lastPosition)
+                    }
+                );
+            }
         }
 
         private void Climb(
@@ -92,10 +141,14 @@ namespace Logic
             DynamicBuffer<MultiPosition> multiPositions,
             DynamicBuffer<ClimbKnot> climbKnots,
             DynamicBuffer<RotateKnot> rotateKnots,
+            DynamicBuffer<WheelKnot> wheelKnots,
             float multiplier,
             bool push,
             bool jumpHeld,
-            bool jumpReleased
+            bool jumpReleased,
+            out bool didMove,
+            out bool didJump,
+            out bool didPush
         )
         {
             var player = SystemAPI.GetComponent<Player>(playerEntity);
@@ -133,6 +186,9 @@ namespace Logic
                 fallingForward = true;
             }
 
+            didMove = false;
+            didJump = false;
+            didPush = false;
             if (lastKnot.Time - StructConstants.CoyoteTime > time) return;
 
             if (lastKnot.Time + StructConstants.CoyoteTime > time)
@@ -165,6 +221,7 @@ namespace Logic
             if (multiplier == 0)
             {
                 if (!jumpReleased || !canJump) return;
+                didJump = true;
 
                 HandlePlayerCells(playerEntity, multiPositions, aboveIsOwn, jumpPositionI, ref cells);
                 QueueJump(ref state, time, multiPositions, climbKnots, jumpPositionI, lastKnot, ClimbFlags.Jump);
@@ -188,13 +245,14 @@ namespace Logic
                 HandlePlayerCells(playerEntity, multiPositions, isOwn, destination, ref cells);
                 QueueJump(ref state, time, multiPositions, climbKnots, destination, lastKnot, flags);
                 _hasJumped = true;
-
+                didJump = true;
                 return;
             }
 
             var nextNextPosition = nextPositionI + (int3)moveDirection;
 
             if (isGrounded && !nextIsOwn && push && cells.IsPushable(nextPositionI, out var pushableEntity))
+            {
                 push = HandlePushing(
                     ref state,
                     ref time,
@@ -206,13 +264,24 @@ namespace Logic
                     downI,
                     ref lastKnot
                 );
+                didPush = push;
+            }
+
             else
                 push = false;
 
             // TODO: If slippery and not grounded, disallow climbing
             if (!push && nextIsSolid)
             {
-                QueueClimbUp(time, climbKnots, multiplier, rotation, lastKnot);
+                QueueClimbUp(
+                    time,
+                    climbKnots,
+                    wheelKnots,
+                    multiplier,
+                    rotation,
+                    lastKnot
+                );
+                didMove = true;
 
                 // Special case where we climb up something as we jump
                 SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
@@ -226,7 +295,17 @@ namespace Logic
             if (!posUnderNextIsOwn && cells.IsSolid(posUnderNextI))
             {
                 HandlePlayerCells(playerEntity, multiPositions, nextIsOwn, nextPositionI, ref cells);
-                QueueMove(time, multiPositions, climbKnots, nextPositionI, nextPosition, lastKnot);
+                QueueMove(
+                    time,
+                    multiPositions,
+                    climbKnots,
+                    wheelKnots,
+                    nextPositionI,
+                    nextPosition,
+                    lastKnot,
+                    multiplier
+                );
+                didMove = true;
                 SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
                 return;
             }
@@ -242,12 +321,14 @@ namespace Logic
 
             if (isGrounded)
             {
+                didMove = true;
                 HandlePlayerCells(playerEntity, multiPositions, nextIsOwn, nextPositionI, ref cells);
                 HandlePlayerCells(playerEntity, multiPositions, posUnderNextIsOwn, posUnderNextI, ref cells);
                 QueueClimbDown(
                     time,
                     multiPositions,
                     climbKnots,
+                    wheelKnots,
                     multiplier,
                     nextPositionI,
                     posUnderNextI,
@@ -264,6 +345,7 @@ namespace Logic
         private static void QueueClimbUp(
             float time,
             DynamicBuffer<ClimbKnot> climbKnots,
+            DynamicBuffer<WheelKnot> wheelKnots,
             float multiplier,
             quaternion rotation,
             ClimbKnot lastKnot
@@ -271,13 +353,27 @@ namespace Logic
         {
             var left = math.round(math.mul(rotation, new float3(-1, 0, 0)));
             var climbUpRotation = quaternion.AxisAngle(left, math.PIHALF * multiplier);
+            var endTime = time + 0.2f;
             climbKnots.Add(
                 new ClimbKnot
                 {
                     Position = lastKnot.Position,
                     Rotation = math.mul(climbUpRotation, lastKnot.Rotation),
-                    Time = time + 0.2f,
+                    Time = endTime,
                     Flags = ClimbFlags.ClimbUp,
+                }
+            );
+
+            var wheelKnot = wheelKnots[^1];
+            wheelKnot.Time = time;
+            wheelKnots[^1] = wheelKnot;
+
+            wheelKnots.Add(
+                new WheelKnot
+                {
+                    Time = endTime,
+                    LeftRotation = wheelKnot.LeftRotation + math.PIHALF * multiplier,
+                    RightRotation = wheelKnot.RightRotation + math.PIHALF * multiplier,
                 }
             );
         }
@@ -286,6 +382,7 @@ namespace Logic
             float time,
             DynamicBuffer<MultiPosition> multiPositions,
             DynamicBuffer<ClimbKnot> climbKnots,
+            DynamicBuffer<WheelKnot> wheelKnots,
             float multiplier,
             int3 nextPositionI,
             int3 posUnderNextI,
@@ -322,12 +419,15 @@ namespace Logic
             var climbDownRotation = quaternion.AxisAngle(right, math.PIHALF * multiplier);
             var endRotation = math.mul(climbDownRotation, lastKnot.Rotation);
 
+            var part1Time = time + 0.2f * 0.5f;
+            var part2Time = time + 0.8f * 0.5f;
+
             climbKnots.Add(
                 new ClimbKnot
                 {
                     Position = lastKnot.Position + moveDirection * 0.5f,
                     Rotation = lastKnot.Rotation,
-                    Time = time + 0.2f * 0.5f,
+                    Time = part1Time,
                     Flags = ClimbFlags.ClimbDown,
                 }
             );
@@ -336,7 +436,7 @@ namespace Logic
                 {
                     Position = nextPosition + down * 0.5f,
                     Rotation = endRotation,
-                    Time = time + 0.8f * 0.5f,
+                    Time = part2Time,
                     Flags = ClimbFlags.ClimbDown,
                 }
             );
@@ -347,6 +447,36 @@ namespace Logic
                     Rotation = endRotation,
                     Time = endTime,
                     Flags = ClimbFlags.ClimbDown,
+                }
+            );
+
+
+            var wheelKnot = wheelKnots[^1];
+            wheelKnot.Time = time;
+            wheelKnots[^1] = wheelKnot;
+
+            wheelKnots.Add(
+                new WheelKnot
+                {
+                    Time = part1Time,
+                    LeftRotation = wheelKnot.LeftRotation + multiplier,
+                    RightRotation = wheelKnot.RightRotation + multiplier,
+                }
+            );
+            wheelKnots.Add(
+                new WheelKnot
+                {
+                    Time = part2Time,
+                    LeftRotation = wheelKnot.LeftRotation + (1 + math.PIHALF) * multiplier,
+                    RightRotation = wheelKnot.RightRotation + (1 + math.PIHALF) * multiplier,
+                }
+            );
+            wheelKnots.Add(
+                new WheelKnot
+                {
+                    Time = endTime,
+                    LeftRotation = wheelKnot.LeftRotation + (2 + math.PIHALF) * multiplier,
+                    RightRotation = wheelKnot.RightRotation + (2 + math.PIHALF) * multiplier,
                 }
             );
         }
@@ -376,9 +506,11 @@ namespace Logic
             float time,
             DynamicBuffer<MultiPosition> multiPositions,
             DynamicBuffer<ClimbKnot> climbKnots,
+            DynamicBuffer<WheelKnot> wheelKnots,
             int3 nextPositionI,
             float3 nextPosition,
-            ClimbKnot lastKnot
+            ClimbKnot lastKnot,
+            float multiplier
         )
         {
             var endTime = time + 0.2f;
@@ -401,6 +533,19 @@ namespace Logic
                     Rotation = lastKnot.Rotation,
                     Time = endTime,
                     Flags = ClimbFlags.Move,
+                }
+            );
+
+            var wheelKnot = wheelKnots[^1];
+            wheelKnot.Time = time;
+            wheelKnots[^1] = wheelKnot;
+
+            wheelKnots.Add(
+                new WheelKnot
+                {
+                    Time = endTime,
+                    LeftRotation = wheelKnot.LeftRotation + 2 * multiplier,
+                    RightRotation = wheelKnot.RightRotation + 2 * multiplier,
                 }
             );
         }
@@ -450,7 +595,7 @@ namespace Logic
                     new ClimbKnot
                     {
                         Position = nextNextPosition,
-                        Rotation = lastKnot.Rotation,
+                        Rotation = lastPushableKnot.Rotation,
                         Time = blockTime,
                         Flags = ClimbFlags.Move,
                     }
@@ -473,8 +618,11 @@ namespace Logic
                     Flags = ClimbFlags.Move,
                 };
 
-                SystemAPI.SetComponent(pushableEntity, new Fall { Direction = downI, Duration = 0.04f });
-                SystemAPI.SetComponentEnabled<Fall>(pushableEntity, true);
+                if (!cells.IsSolid(nextNextPosition + downI))
+                {
+                    SystemAPI.SetComponent(pushableEntity, new Fall { Direction = downI, Duration = 0.04f });
+                    SystemAPI.SetComponentEnabled<Fall>(pushableEntity, true);
+                }
             }
 
             return push;
@@ -518,8 +666,16 @@ namespace Logic
             return isInList;
         }
 
-        private void Rotate(ref SystemState state, float time, DynamicBuffer<RotateKnot> rotateKnots, float multiplier)
+        private void Rotate(
+            ref SystemState state,
+            float time,
+            DynamicBuffer<RotateKnot> rotateKnots,
+            DynamicBuffer<WheelKnot> wheelKnots,
+            float multiplier,
+            out bool didRotate
+        )
         {
+            didRotate = rotateKnots.Length <= 1;
             if (rotateKnots.Length > 1) return;
 
             var firstKnot = rotateKnots[0];
@@ -535,11 +691,25 @@ namespace Logic
 
             var rotation = quaternion.AxisAngle(new float3(0, 1, 0), math.PIHALF * multiplier);
 
+            var endTime = time + 0.2f;
             rotateKnots.Add(
                 new RotateKnot
                 {
                     Rotation = math.mul(rotation, firstKnot.Rotation),
-                    Time = time + 0.2f,
+                    Time = endTime,
+                }
+            );
+
+            var wheelKnot = wheelKnots[^1];
+            wheelKnot.Time = time;
+            wheelKnots[^1] = wheelKnot;
+
+            wheelKnots.Add(
+                new WheelKnot
+                {
+                    Time = endTime,
+                    LeftRotation = wheelKnot.LeftRotation + math.PIHALF * multiplier,
+                    RightRotation = wheelKnot.RightRotation - math.PIHALF * multiplier,
                 }
             );
         }

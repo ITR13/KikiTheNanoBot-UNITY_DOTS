@@ -9,6 +9,9 @@ namespace Authoring
     internal class PlayerAuthoring : MonoBehaviour
     {
         public GameObject Bullet;
+
+        public AudioOneShotAuthoring MoveAudio, PushAudio, JumpAudio;
+        public AudioOneShotAuthoring LandAudio;
     }
 
     internal class PlayerAuthoringBaker : Baker<PlayerAuthoring>
@@ -22,6 +25,10 @@ namespace Authoring
                 {
                     BulletPrefab = GetEntity(authoring.Bullet, TransformUsageFlags.Renderable),
                     FallForwardDeadline = float.NegativeInfinity,
+
+                    JumpAudio = GetEntity(authoring.LandAudio, TransformUsageFlags.None),
+                    PushAudio = GetEntity(authoring.PushAudio, TransformUsageFlags.None),
+                    MoveAudio = GetEntity(authoring.MoveAudio, TransformUsageFlags.None),
                 }
             );
             AddComponent<PushableTag>(entity);
@@ -60,8 +67,23 @@ namespace Authoring
                 }
             );
 
+            var wheelKnots = AddBuffer<WheelKnot>(entity);
+            wheelKnots.Add(
+                new WheelKnot
+                {
+                    Time = 0,
+                    LeftRotation = 0,
+                    RightRotation = 0,
+                }
+            );
+
             AddComponent<Fall>(entity);
             SetComponentEnabled<Fall>(entity, false);
+
+            AddComponent(
+                entity,
+                new OneShotAudioReference { Entity = GetEntity(authoring.LandAudio, TransformUsageFlags.None) }
+            );
         }
     }
 }

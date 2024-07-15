@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3, y: 3, z: 5}
-  m_LocalScale: {x: 7, y: 7, z: 11}
+  m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -99,3 +99,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b385cafa2f06444481c372ab86f46a63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BaseColor: {r: 1, g: 1, b: 1, a: 1}
+  EdgeColor: {r: 0.20000002, g: 0.20000002, b: 0.20000002, a: 1}
+  AmbientColor: {r: 0, g: 0, b: 0, a: 0}
+  GoalColor: {r: 1, g: 1, b: 0, a: 1}
+  GearColor: {r: 0.030975007, g: 0.3631641, b: 0.525, a: 1}

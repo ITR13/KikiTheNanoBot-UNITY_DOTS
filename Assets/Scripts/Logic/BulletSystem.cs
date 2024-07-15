@@ -29,16 +29,21 @@ namespace Logic
 
             var hitPositions = new NativeHashSet<int3>(10, state.WorldUpdateAllocator);
 
-            foreach (var (bullet, entity) in SystemAPI.Query<Bullet>().WithEntityAccess())
+            foreach (var (bullet, audio, entity) in SystemAPI.Query<Bullet, OneShotAudioReference>().WithEntityAccess())
             {
-                var position = (int3)math.round(bullet.Start + bullet.Forward * (time - bullet.StartTime) * Bullet.Speed);
+                var position = (int3)math.round(
+                    bullet.Start + bullet.Forward * (time - bullet.StartTime) * Bullet.Speed
+                );
                 if (!cells.IsSolid(position)) continue;
+                var audioEntity = ecb.Instantiate(audio.Entity);
+                ecb.SetComponent(audioEntity, new LocalToWorld { Value = float4x4.Translate(position) });
+
                 ecb.DestroyEntity(entity);
                 hitPositions.Add(position);
             }
 
             if (hitPositions.Count <= 0) return;
-            foreach (var (target, transform) in SystemAPI.Query<EnabledRefRW<DisabledSwitchTag>, LocalToWorld>())
+            foreach (var (target, transform) in SystemAPI.Query<EnabledRefRW<DisabledSwitchTag>, LocalToWorld>().WithOptions(EntityQueryOptions.IgnoreComponentEnabledState))
             {
                 var position = (int3)math.round(transform.Position);
                 target.ValueRW ^= hitPositions.Contains(position);

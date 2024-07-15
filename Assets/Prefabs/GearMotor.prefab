@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7964677474763264714}
   - component: {fileID: 5070798826734087040}
   - component: {fileID: 8609372358715690772}
+  - component: {fileID: 354702424037287014}
   m_Layer: 0
   m_Name: cylinder
   m_TagString: Untagged
@@ -86,6 +87,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &354702424037287014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170399928041587185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08c47eed6aea4c978517028ee255316d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FollowPosition: 0
 --- !u!1 &7329056008284255855
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,6 +109,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3712216375779248538}
+  - component: {fileID: 2874542286975982766}
   m_Layer: 0
   m_Name: ThingAboveMotor
   m_TagString: Untagged
@@ -117,6 +132,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2537758932646704525}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2874542286975982766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7329056008284255855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08c47eed6aea4c978517028ee255316d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FollowPosition: 0
 --- !u!1 &7442648936395401085
 GameObject:
   m_ObjectHideFlags: 0
@@ -129,6 +157,8 @@ GameObject:
   - component: {fileID: 3542250313190034700}
   - component: {fileID: 3698505618450840}
   - component: {fileID: 6346335221187844309}
+  - component: {fileID: 3065960435022497954}
+  - component: {fileID: 2279248576800917981}
   m_Layer: 0
   m_Name: kolben
   m_TagString: Untagged
@@ -145,7 +175,7 @@ Transform:
   m_GameObject: {fileID: 7442648936395401085}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -182,7 +212,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8bc35b6cde28b254299826da7801f3e3, type: 2}
+  - {fileID: 2100000, guid: 34c3f1754c310ef4b8b6b74026689ec0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -222,6 +252,31 @@ MonoBehaviour:
   GearToWire: 0
   WireCube: 0
   Shootable: 0
+--- !u!114 &3065960435022497954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7442648936395401085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08c47eed6aea4c978517028ee255316d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FollowPosition: 0
+--- !u!114 &2279248576800917981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7442648936395401085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e460703a3a6c495fb9c64cf082fa300d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6454418373646921661
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -237,6 +292,10 @@ PrefabInstance:
     - target: {fileID: 3633698051035860168, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
       propertyPath: m_Name
       value: GearMotor
+      objectReference: {fileID: 0}
+    - target: {fileID: 3925210400658338183, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
+      propertyPath: FollowPosition
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4061260932754626370, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
       propertyPath: Pushable
@@ -290,7 +349,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 877016039254137168, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
+    - {fileID: 4151658048739048968, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 8837572226694879792, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
@@ -302,38 +363,8 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8837572226694879792, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7964677474763264714}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6682689119158439547, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9182938251940845643}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
---- !u!1 &373549217164304838 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6682689119158439547, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}
-  m_PrefabInstance: {fileID: 6454418373646921661}
-  m_PrefabAsset: {fileID: 0}
---- !u!64 &9182938251940845643
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 373549217164304838}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -2432090755550338912, guid: a1134e702e1f7f4498c44819d3894cf4, type: 3}
 --- !u!4 &2537758932646704525 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8837572226694879792, guid: 8a2932e53e73cbc47a2266a589868016, type: 3}

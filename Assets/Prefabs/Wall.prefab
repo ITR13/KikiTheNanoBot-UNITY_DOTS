@@ -48,9 +48,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Pushable: 0
   Gear: 0
-  GearGenerator: 0
+  GearMotor: 0
   GearToWire: 0
   WireCube: 0
+  Shootable: 0
+  LandAudio: {fileID: 1781992815082733441, guid: 7d69f28d909e7fa439f5c111f608a077, type: 3}
 --- !u!33 &4597634772834614276
 MeshFilter:
   m_ObjectHideFlags: 0
