@@ -97,6 +97,6 @@ All the audio files are taken from the original game.
 **Shader.SetGlobalColor** worked well to make a palette and not need a reference to all the materials, so I have InitializeColorsSystem for that.
 **Persistent Variables** is a really nice way to communicate between Entities and UI without a ton of coupling, but for some reason the baked reference wasn't the same as the reference in the scene, so I had to make a monobehaviour spawn it instead. :(
 **Some math stuff I keep needing to write myself** that would be really nice to have in math is an floating point ray that travels through integer positons, and also MoveTowards and SmoothDamp.
+**Input** had a dumb issue in the build due to the different framerates. That one is on me, though it felt like the weirdest bug ever. 
 **I didn't really talk about** bullets and Gear rotation, but other than that I think I've covered the entire project.
-**Oh and input** was really weird? For some reason the ActionMap was always enabled in editor, but had to be manually enabled when I made a build. It also didn't detect the new actions that were added in the build for some reason, but I think that's something that got cached somewhere on my computer? Hopefully it works for other people.
 **Unity Recorder** for some reason breaks the project and permanently moves the camera to a strange offset. This made it difficult to record good gifs for the itch.io page.

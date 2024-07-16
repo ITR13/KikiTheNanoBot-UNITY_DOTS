@@ -3,16 +3,16 @@ using Unity.Entities;
 using UnityEngine;
 using UnityEngine.Localization.SmartFormat.PersistentVariables;
 
-public class CreateEntityWIthAsset : MonoBehaviour
+public class CreateEntityWithAsset : MonoBehaviour
 {
-    [SerializeField] private VariablesGroupAsset Asset;
+    [SerializeField] private VariablesGroupAsset _asset;
 
     void Start()
     {
         World.DefaultGameObjectInjectionWorld.EntityManager.CreateSingleton(
             new VariableHolder
             {
-                VariableGroup = Asset,
+                VariableGroup = _asset,
             }
         );
     }

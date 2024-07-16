@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using System.IO;
+using Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -20,6 +21,16 @@ namespace Logic
         protected override void OnStartRunning()
         {
             var actionAsset = SystemAPI.GetSingleton<InputComponent>().InputActions.Value;
+            var bindingsPath = Path.Combine(Application.persistentDataPath, "Controls.json");
+            if (File.Exists(bindingsPath))
+            {
+                actionAsset.LoadFromJson(File.ReadAllText(bindingsPath));
+            }
+            else
+            {
+                File.WriteAllText(bindingsPath, actionAsset.ToJson());
+            }
+            
             _move = actionAsset.FindAction("Move");
             _jump = actionAsset.FindAction("Jump");
             _push = actionAsset.FindAction("Push");
@@ -47,22 +58,21 @@ namespace Logic
             inputComponent.Shoot = ReadButton(_shoot);
             inputComponent.Look = new float2(_look.ReadValue<Vector2>());
 
-            inputComponent.Reset = ReadButton(_reset);
-            inputComponent.NextLevel = ReadButton(_nextLevel);
-            inputComponent.PreviousLevel = ReadButton(_previousLevel);
+            // We these needs to save their states across multiple frames due to fixed update happening more frequently than update
+            inputComponent.Reset = ReadButton(_reset, inputComponent.Reset);
+            inputComponent.NextLevel = ReadButton(_nextLevel, inputComponent.NextLevel);
+            inputComponent.PreviousLevel = ReadButton(_previousLevel, inputComponent.PreviousLevel);
 
-            inputComponent.NextLook = ReadButton(_nextLook);
-            inputComponent.PreviousLook = ReadButton(_previousLook);
+            inputComponent.NextLook = ReadButton(_nextLook, inputComponent.NextLook);
+            inputComponent.PreviousLook = ReadButton(_previousLook, inputComponent.PreviousLook);
         }
 
-        private InputComponent.ButtonState ReadButton(InputAction action)
+        private InputComponent.ButtonState ReadButton(InputAction action, InputComponent.ButtonState baseState=default)
         {
-            return new InputComponent.ButtonState
-            {
-                PressedThisFrame = action.WasPressedThisFrame(),
-                CurrentlyPressed = action.IsPressed(),
-                ReleasedThisFrame = action.WasReleasedThisFrame(),
-            };
+            baseState.PressedThisFrame |= action.WasPressedThisFrame();
+            baseState.CurrentlyPressed |= action.IsPressed();
+            baseState.ReleasedThisFrame |= action.WasReleasedThisFrame();
+            return baseState;
         }
     }
 }

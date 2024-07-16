@@ -37,7 +37,7 @@ namespace Logic
 
             var deltaTime = SystemAPI.Time.DeltaTime;
 
-            var input = SystemAPI.GetSingleton<InputComponent>();
+            ref var input = ref SystemAPI.GetSingletonRW<InputComponent>().ValueRW;
             if (input.NextLook.PressedThisFrame)
             {
                 _currentLook = (_currentLook + 1) % LookOffsets.Length;
