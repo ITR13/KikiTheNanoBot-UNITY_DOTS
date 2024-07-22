@@ -52,19 +52,27 @@ namespace Logic
             bool jumpReleased
         )
         {
-            var playerEntity = SystemAPI.GetSingletonEntity<Player>();
-            var playerComponent = SystemAPI.GetComponent<Player>(playerEntity);
             var goal = SystemAPI.GetSingleton<Goal>();
-            var multiPositions = SystemAPI.GetBuffer<MultiPosition>(playerEntity);
+            // Goal is positive infinity until we reach it
+            if (goal.WinAtTime < double.PositiveInfinity) return;
+            var playerEntity = SystemAPI.GetSingletonEntity<Player>();
 
-            var lastPosition = multiPositions[^1].Position;
+            var playerComponent = SystemAPI.GetComponent<Player>(playerEntity);
+            var multiPositions = SystemAPI.GetBuffer<MultiPosition>(playerEntity);
+            var climbKnots = SystemAPI.GetBuffer<ClimbKnot>(playerEntity);
+
 
             var time = (float)SystemAPI.Time.ElapsedTime;
+            var firstPosition = multiPositions[0].Position;
 
-            if (goal.Active && math.all(lastPosition == goal.Position))
+            if (goal.Active && math.all(firstPosition == goal.Position))
             {
+                if (climbKnots.Length > 1)
+                {
+                    climbKnots.RemoveRange(1, climbKnots.Length - 1);
+                }
+
                 SystemAPI.SetComponentEnabled<Fall>(playerEntity, false);
-                if (!(goal.WinAtTime > time + 1)) return;
                 goal.WinAtTime = time + 1;
                 SystemAPI.SetSingleton(goal);
 
@@ -73,14 +81,15 @@ namespace Logic
                     audio,
                     new LocalToWorld
                     {
-                        Value = float4x4.Translate(lastPosition),
+                        Value = float4x4.Translate(firstPosition),
                     }
                 );
                 return;
             }
 
+            var lastPosition = multiPositions[^1].Position;
 
-            var climbKnots = SystemAPI.GetBuffer<ClimbKnot>(playerEntity);
+
             var rotateKnots = SystemAPI.GetBuffer<RotateKnot>(playerEntity);
             var wheelKnots = SystemAPI.GetBuffer<WheelKnot>(playerEntity);
 
@@ -96,6 +105,7 @@ namespace Logic
                 push,
                 jumpHeld,
                 jumpReleased,
+                false,
                 out var didMove,
                 out var didJump,
                 out var didPush
@@ -155,32 +165,32 @@ namespace Logic
             bool push,
             bool jumpHeld,
             bool jumpReleased,
+            bool fallingForward,
             out bool didMove,
             out bool didJump,
             out bool didPush
         )
         {
-            var player = SystemAPI.GetComponent<Player>(playerEntity);
-            var lastKnot = climbKnots[^1];
-            var lastRotate = rotateKnots[^1].Rotation;
+            didMove = false;
+            didJump = false;
+            didPush = false;
 
+            var lastKnot = climbKnots[^1];
+            ref var cells = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
+            var lastRotate = rotateKnots[^1].Rotation;
             var rotation = math.mul(lastKnot.Rotation, lastRotate.value);
             var moveDirection = math.round(math.forward(rotation)) * multiplier;
-            var nextPosition = math.round(lastKnot.Position + moveDirection);
 
-            var nextPositionI = (int3)nextPosition;
-            var nextIsOwn = CheckPosition(nextPositionI, multiPositions);
-            ref var cells = ref SystemAPI.GetSingletonRW<CellHolder>().ValueRW;
-            var nextIsSolid = !nextIsOwn && cells.IsSolid(nextPositionI);
+            var down = math.round(math.mul(rotation, new float3(0, -1, 0)));
+            var downI = (int3)down;
 
-            var fallingForward = false;
-            if (
-                (lastKnot.Flags & (ClimbFlags.JumpForward | ClimbFlags.Fall)) != ClimbFlags.None &&
-                time < player.FallForwardDeadline &&
-                multiplier > 0 &&
-                !nextIsSolid
-            )
+            if (lastKnot.Time - StructConstants.CoyoteTime > time && !fallingForward)
             {
+                if (multiplier == 0 || !CanUndoFall(cells, climbKnots, multiPositions, moveDirection, downI))
+                {
+                    return;
+                }
+
                 while (climbKnots.Length > 1 && climbKnots[^1].Flags == ClimbFlags.Fall) climbKnots.Length--;
 
                 while (multiPositions.Length > 1 && multiPositions[^1].Flags == ClimbFlags.Fall)
@@ -192,13 +202,15 @@ namespace Logic
                 }
 
                 lastKnot = climbKnots[^1];
-                fallingForward = true;
             }
 
-            didMove = false;
-            didJump = false;
-            didPush = false;
-            if (lastKnot.Time - StructConstants.CoyoteTime > time) return;
+            var player = SystemAPI.GetComponent<Player>(playerEntity);
+            var nextPosition = math.round(lastKnot.Position + moveDirection);
+
+            var nextPositionI = (int3)nextPosition;
+            var nextIsOwn = CheckPosition(nextPositionI, multiPositions);
+            var nextIsSolid = !nextIsOwn && cells.IsSolid(nextPositionI);
+
 
             if (lastKnot.Time + StructConstants.CoyoteTime > time)
             {
@@ -209,10 +221,6 @@ namespace Logic
                 lastKnot.Time = time;
                 climbKnots[^1] = lastKnot;
             }
-
-
-            var down = math.round(math.mul(rotation, new float3(0, -1, 0)));
-            var downI = (int3)down;
 
             var belowUs = math.round(lastKnot.Position + down);
             var belowUsI = (int3)belowUs;
@@ -247,11 +255,6 @@ namespace Logic
                 var destination = jumpUpInstead ? jumpPositionI : jumpForwardPositionI;
                 var isOwn = jumpUpInstead ? aboveIsOwn : CheckPosition(jumpForwardPositionI, multiPositions);
                 var flags = jumpUpInstead ? ClimbFlags.Jump : ClimbFlags.JumpForward;
-                if (!jumpUpInstead)
-                {
-                    player.FallForwardDeadline = time + JumpTime + StructConstants.CoyoteTime;
-                    player.Moves += 1;
-                }
 
                 player.Moves += 1;
                 SystemAPI.SetComponent(playerEntity, player);
@@ -260,6 +263,29 @@ namespace Logic
                 QueueJump(ref state, time, multiPositions, climbKnots, destination, lastKnot, flags);
                 _hasJumped = true;
                 didJump = true;
+
+                if (!jumpUpInstead)
+                {
+                    // Force move forward :)
+                    Climb(
+                        ref state,
+                        time,
+                        playerEntity,
+                        multiPositions,
+                        climbKnots,
+                        rotateKnots,
+                        wheelKnots,
+                        1,
+                        false,
+                        false,
+                        false,
+                        true,
+                        out _,
+                        out _,
+                        out _
+                    );
+                }
+
                 return;
             }
 
@@ -332,7 +358,7 @@ namespace Logic
             {
                 HandlePlayerCells(playerEntity, multiPositions, posUnderNextIsOwn, posUnderNextI, ref cells);
                 QueueJump(ref state, time, multiPositions, climbKnots, posUnderNextI, lastKnot, ClimbFlags.FallForward);
-                player.FallForwardDeadline = float.NegativeInfinity;
+                player.Moves += 1;
                 SystemAPI.SetComponent(playerEntity, player);
                 return;
             }
@@ -360,6 +386,39 @@ namespace Logic
                 player.Moves += 1;
                 SystemAPI.SetComponent(playerEntity, player);
             }
+        }
+
+        private bool CanUndoFall(
+            CellHolder cells,
+            DynamicBuffer<ClimbKnot> climbKnots,
+            DynamicBuffer<MultiPosition> multiPositions,
+            float3 moveDirection,
+            int3 downI
+        )
+        {
+            var lastKnot = climbKnots[0];
+            for (var i = climbKnots.Length - 1; i > 0; i--)
+            {
+                if (climbKnots[i].Flags == ClimbFlags.Fall) continue;
+                lastKnot = climbKnots[i];
+                break;
+            }
+
+            if ((lastKnot.Flags & ClimbFlags.Fall) == ClimbFlags.None) return false;
+
+            var nextPosition = math.round(lastKnot.Position + moveDirection);
+
+            var nextPositionI = (int3)nextPosition;
+            var nextIsOwn = CheckPosition(nextPositionI, multiPositions);
+            var nextIsSolid = !nextIsOwn && cells.IsSolid(nextPositionI);
+
+            if (nextIsSolid) return true;
+
+            var underNextPositionI = nextPositionI + downI;
+            var underNextIsOwn = CheckPosition(underNextPositionI, multiPositions);
+            var underNextIsSolid = !underNextIsOwn && cells.IsSolid(underNextPositionI);
+
+            return underNextIsSolid;
         }
 
         private static void QueueClimbUp(

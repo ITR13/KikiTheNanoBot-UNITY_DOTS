@@ -24,7 +24,6 @@ namespace Authoring
                 new Player
                 {
                     BulletPrefab = GetEntity(authoring.Bullet, TransformUsageFlags.Renderable),
-                    FallForwardDeadline = float.NegativeInfinity,
 
                     JumpAudio = GetEntity(authoring.JumpAudio, TransformUsageFlags.None),
                     PushAudio = GetEntity(authoring.PushAudio, TransformUsageFlags.None),
