@@ -11,7 +11,7 @@ namespace Logic
     [UpdateAfter(typeof(KnotRenderPosSystem))]
     public partial struct CameraSystem : ISystem
     {
-        private static readonly float3[] LookOffsets = new[]
+        private static readonly float3[] LookOffsets =
         {
             new float3(0, 1, -3),
             new float3(0, 0, 0),
@@ -38,15 +38,10 @@ namespace Logic
             var deltaTime = SystemAPI.Time.DeltaTime;
 
             ref var input = ref SystemAPI.GetSingletonRW<InputComponent>().ValueRW;
-            if (input.NextLook.PressedThisFrame)
-            {
-                _currentLook = (_currentLook + 1) % LookOffsets.Length;
-            }
+            if (input.NextLook.PressedThisFrame) _currentLook = (_currentLook + 1) % LookOffsets.Length;
 
             if (input.PreviousLook.PressedThisFrame)
-            {
                 _currentLook = (_currentLook + LookOffsets.Length - 1) % LookOffsets.Length;
-            }
 
             input.NextLook.PressedThisFrame = default;
             input.PreviousLevel.PressedThisFrame = default;
@@ -79,10 +74,7 @@ namespace Logic
         {
             var distance = math.distance(from, to);
 
-            if (distance < maxDelta)
-            {
-                return to;
-            }
+            if (distance < maxDelta) return to;
 
             return from + (to - from) * maxDelta / distance;
         }

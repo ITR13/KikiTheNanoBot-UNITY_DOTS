@@ -62,14 +62,12 @@ namespace Logic
         private LocalTransform CalculateLocalTransform(float time, DynamicBuffer<ClimbKnot> knots)
         {
             if (knots.Length == 1)
-            {
                 return new LocalTransform
                 {
                     Position = knots[0].Position,
                     Rotation = knots[0].Rotation,
                     Scale = 0.1f,
                 };
-            }
 
             var normalizedTime = math.unlerp(knots[0].Time, knots[1].Time, time);
             var lerpTime = normalizedTime;

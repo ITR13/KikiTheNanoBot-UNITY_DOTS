@@ -27,9 +27,7 @@ namespace Logic
                 TargetRotationNormalized = targetRotation,
                 DeltaTime = deltaTime,
             }.Schedule(state.Dependency);
-            state.Dependency = new UpdateActualRotation
-            {
-            }.Schedule(state.Dependency);
+            state.Dependency = new UpdateActualRotation().Schedule(state.Dependency);
         }
 
         [BurstCompile]
@@ -44,14 +42,12 @@ namespace Logic
                 ref GearRotation rotation
             )
             {
-                if (!gear.Powered)
-                {
-                    return;
-                }
+                if (!gear.Powered) return;
 
                 var pos = positions[^1].Position;
                 var targetMultiplier = (pos.x ^ pos.z) & 1;
-                var target = TargetRotationNormalized * targetMultiplier + (1 - TargetRotationNormalized) * (1 - targetMultiplier);
+                var target = TargetRotationNormalized * targetMultiplier +
+                             (1 - TargetRotationNormalized) * (1 - targetMultiplier);
 
                 var delta = target - rotation.Normalized;
                 var absDelta = math.abs(delta);

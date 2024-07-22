@@ -1,5 +1,4 @@
 ﻿using Data;
-using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -22,7 +21,7 @@ namespace Logic
         {
             var fixedStepSimulationSystemGroup = state.World.GetExistingSystemManaged<FixedStepSimulationSystemGroup>();
             fixedStepSimulationSystemGroup.Timestep = 1f / TargetRate;
-            
+
             var presentationSystemGroup = state.World.GetExistingSystemManaged<PresentationSystemGroup>();
             presentationSystemGroup.RateManager = new RenderRateManager();
 

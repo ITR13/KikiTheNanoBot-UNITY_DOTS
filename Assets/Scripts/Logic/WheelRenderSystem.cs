@@ -40,7 +40,7 @@ namespace Logic
                 if (knots.Length > 1)
                 {
                     var normalizedTime = math.unlerp(knots[0].Time, knots[1].Time, ElapsedTime);
-                    var nextKnotRadians =  wheel.IsLeftWheel ? knots[1].LeftRotation : knots[1].RightRotation;
+                    var nextKnotRadians = wheel.IsLeftWheel ? knots[1].LeftRotation : knots[1].RightRotation;
                     knotRadians = math.lerp(knotRadians, nextKnotRadians, normalizedTime);
                 }
 

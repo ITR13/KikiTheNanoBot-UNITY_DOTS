@@ -14,8 +14,8 @@ namespace Logic
         private const float JumpTime = 0.2f;
         private const float MoveTime = 0.2f;
         private const float ClimbUpTime = 0.5f;
-        
-        
+
+
         // I'm lazy, sue me
         private bool _hasJumped;
 
@@ -67,7 +67,7 @@ namespace Logic
                 if (!(goal.WinAtTime > time + 1)) return;
                 goal.WinAtTime = time + 1;
                 SystemAPI.SetSingleton(goal);
-                    
+
                 var audio = state.EntityManager.Instantiate(playerComponent.GoalAudio);
                 SystemAPI.SetComponent(
                     audio,
@@ -252,6 +252,7 @@ namespace Logic
                     player.FallForwardDeadline = time + JumpTime + StructConstants.CoyoteTime;
                     player.Moves += 1;
                 }
+
                 player.Moves += 1;
                 SystemAPI.SetComponent(playerEntity, player);
 
@@ -281,7 +282,9 @@ namespace Logic
             }
 
             else
+            {
                 push = false;
+            }
 
             // TODO: If slippery and not grounded, disallow climbing
             if (!push && nextIsSolid)

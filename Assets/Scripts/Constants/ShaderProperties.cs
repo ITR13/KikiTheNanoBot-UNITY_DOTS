@@ -1,12 +1,13 @@
 ﻿using Unity.Burst;
-using UnityEditor;
 using UnityEngine;
 
 namespace Constants
 {
     public struct ShaderProperties
     {
-        public static readonly SharedStatic<ShaderProperties> Instance = SharedStatic<ShaderProperties>.GetOrCreate<ShaderProperties>();
+        public static readonly SharedStatic<ShaderProperties> Instance =
+            SharedStatic<ShaderProperties>.GetOrCreate<ShaderProperties>();
+
         public int GoalAlpha;
         public int WireColor;
 

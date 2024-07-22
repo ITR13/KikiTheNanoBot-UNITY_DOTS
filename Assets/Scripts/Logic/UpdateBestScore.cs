@@ -2,7 +2,6 @@
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace Logic
@@ -29,13 +28,12 @@ namespace Logic
             if (!goal.Active || !math.all(lastPosition == goal.Position)) return;
 
             var levelData = SystemAPI.GetSingleton<LoadedLevel>();
-            var key = "Best-" + levelData.Name.ToString();
+            var key = "Best-" + levelData.Name;
             var bestMoves = PlayerPrefs.GetInt(key, 10000);
-            
+
             if (playerComponent.Moves >= bestMoves) return;
 
             PlayerPrefs.SetInt(key, playerComponent.Moves);
         }
     }
 }
-

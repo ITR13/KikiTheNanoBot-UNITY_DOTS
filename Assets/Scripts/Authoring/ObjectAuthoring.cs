@@ -30,10 +30,7 @@ namespace Authoring
                 var entity = GetEntity(transformUsageFlags);
 
                 AddComponent<SolidTag>(entity);
-                if (authoring.Shootable)
-                {
-                    AddComponent<DisabledSwitchTag>(entity);
-                }
+                if (authoring.Shootable) AddComponent<DisabledSwitchTag>(entity);
 
                 var position = (float3)authoring.transform.position;
                 var positionI = (int3)math.round(position);
@@ -58,7 +55,7 @@ namespace Authoring
                     AddComponent<Gear>(entity);
                     AddComponent(
                         entity,
-                        new GearRotation { }
+                        new GearRotation()
                     );
                 }
 

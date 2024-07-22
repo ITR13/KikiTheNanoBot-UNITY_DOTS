@@ -14,9 +14,7 @@ namespace Logic
             var time = (float)SystemAPI.Time.ElapsedTime;
 
             foreach (var (bullet, transform) in SystemAPI.Query<Bullet, RefRW<LocalTransform>>())
-            {
                 transform.ValueRW.Position = bullet.Start + bullet.Forward * (time - bullet.StartTime) * Bullet.Speed;
-            }
         }
     }
 }

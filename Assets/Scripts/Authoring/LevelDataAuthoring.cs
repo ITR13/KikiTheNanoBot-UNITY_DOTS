@@ -17,15 +17,9 @@ namespace Authoring
 
         public void Update()
         {
-            while (LevelNames.Count < Levels.Count)
-            {
-                LevelNames.Add("Lorem Ipsum");
-            }
+            while (LevelNames.Count < Levels.Count) LevelNames.Add("Lorem Ipsum");
 
-            while (LevelMoves.Count < Levels.Count)
-            {
-                LevelMoves.Add(0);
-            }
+            while (LevelMoves.Count < Levels.Count) LevelMoves.Add(0);
         }
 
         private class Baker : Baker<LevelDataAuthoring>

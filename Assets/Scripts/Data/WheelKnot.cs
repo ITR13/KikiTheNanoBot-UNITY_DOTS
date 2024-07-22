@@ -1,6 +1,4 @@
-﻿using Constants;
-using Unity.Entities;
-using Unity.Mathematics;
+﻿using Unity.Entities;
 
 namespace Data
 {

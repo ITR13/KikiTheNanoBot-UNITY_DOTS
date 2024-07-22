@@ -4,7 +4,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 namespace Logic
 {
@@ -29,10 +28,7 @@ namespace Logic
             var playerPositions = SystemAPI.GetBuffer<MultiPosition>(playerEntity);
             var ignorePositions = new NativeHashSet<int3>(playerPositions.Length, state.WorldUpdateAllocator);
 
-            foreach (var knot in playerPositions)
-            {
-                ignorePositions.Add(knot.Position);
-            }
+            foreach (var knot in playerPositions) ignorePositions.Add(knot.Position);
 
             var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged);

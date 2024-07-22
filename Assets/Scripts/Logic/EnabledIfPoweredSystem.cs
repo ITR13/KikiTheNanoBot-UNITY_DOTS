@@ -18,16 +18,13 @@ namespace Logic
         {
             var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged);
-            foreach (var (buffer, powered) in SystemAPI.Query<DynamicBuffer<EnabledIfPowered>, WireCube>().WithAbsent<Goal>())
+            foreach (var (buffer, powered) in SystemAPI.Query<DynamicBuffer<EnabledIfPowered>, WireCube>()
+                         .WithAbsent<Goal>())
             {
                 var isPowered = powered.Powered;
                 foreach (var toChange in buffer)
-                {
                     if (state.EntityManager.IsEnabled(toChange.Entity) != isPowered)
-                    {
                         ecb.SetEnabled(toChange.Entity, isPowered);
-                    }
-                }
             }
 
             var cells = SystemAPI.GetSingleton<CellHolder>();
@@ -35,37 +32,26 @@ namespace Logic
             {
                 var isPowered = cells.PoweredGroups.IsSet(wire.Group);
                 foreach (var toChange in buffer)
-                {
                     if (state.EntityManager.IsEnabled(toChange.Entity) != isPowered)
-                    {
                         ecb.SetEnabled(toChange.Entity, isPowered);
-                    }
-                }
             }
 
             foreach (var (buffer, switchEnabled) in SystemAPI
-                         .Query<DynamicBuffer<EnabledIfPowered>, EnabledRefRO<DisabledSwitchTag>>().WithOptions(EntityQueryOptions.IgnoreComponentEnabledState))
+                         .Query<DynamicBuffer<EnabledIfPowered>, EnabledRefRO<DisabledSwitchTag>>()
+                         .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState))
             {
                 var isPowered = !switchEnabled.ValueRO;
                 foreach (var toChange in buffer)
-                {
                     if (state.EntityManager.IsEnabled(toChange.Entity) != isPowered)
-                    {
                         ecb.SetEnabled(toChange.Entity, isPowered);
-                    }
-                }
             }
-            
+
             foreach (var (buffer, goal) in SystemAPI.Query<DynamicBuffer<EnabledIfPowered>, Goal>())
             {
                 var isPowered = goal.Active;
                 foreach (var toChange in buffer)
-                {
                     if (state.EntityManager.IsEnabled(toChange.Entity) != isPowered)
-                    {
                         ecb.SetEnabled(toChange.Entity, isPowered);
-                    }
-                }
             }
         }
     }

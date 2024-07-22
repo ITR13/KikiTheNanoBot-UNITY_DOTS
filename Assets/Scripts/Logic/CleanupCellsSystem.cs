@@ -21,7 +21,9 @@ namespace Logic
                 .GetSingleton<EndInitializationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged);
 
-            foreach (var (cellsRef, entity) in SystemAPI.Query<RefRW<CellHolder>>().WithAbsent<Room>().WithEntityAccess())
+            foreach (var (cellsRef, entity) in SystemAPI.Query<RefRW<CellHolder>>()
+                         .WithAbsent<Room>()
+                         .WithEntityAccess())
             {
                 ref var cells = ref cellsRef.ValueRW;
                 cells.Dispose();

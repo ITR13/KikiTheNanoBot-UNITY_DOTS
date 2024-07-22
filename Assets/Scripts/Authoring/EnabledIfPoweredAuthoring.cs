@@ -16,14 +16,12 @@ namespace Authoring
                 var entity = GetEntity(TransformUsageFlags.None);
                 var buffer = AddBuffer<EnabledIfPowered>(entity);
                 foreach (var go in authoring.Objects)
-                {
                     buffer.Add(
                         new EnabledIfPowered
                         {
                             Entity = GetEntity(go, TransformUsageFlags.None),
                         }
                     );
-                }
             }
         }
     }

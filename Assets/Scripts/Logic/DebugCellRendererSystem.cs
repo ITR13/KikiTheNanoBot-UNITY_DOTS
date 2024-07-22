@@ -44,10 +44,10 @@ namespace Logic
                 rp.worldBounds = new Bounds(roomBoundsF / 2, roomBoundsF);
                 rp.matProps = new MaterialPropertyBlock();
                 rp.matProps.SetColor(shaderProperties.WireColor, Color.green / 2);
-                UnityEngine.Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _fullCubes.AsArray());
+                Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _fullCubes.AsArray());
 
                 rp.matProps.SetColor(shaderProperties.WireColor, Color.yellow);
-                UnityEngine.Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _pushableCubes.AsArray());
+                Graphics.RenderMeshInstanced(rp, debug.Mesh, 0, _pushableCubes.AsArray());
             }
         }
 

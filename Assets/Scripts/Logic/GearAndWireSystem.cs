@@ -1,5 +1,5 @@
-﻿using Data;
-using Constants;
+﻿using Constants;
+using Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;

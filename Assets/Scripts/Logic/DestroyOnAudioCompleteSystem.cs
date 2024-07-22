@@ -22,10 +22,7 @@ namespace Logic
             foreach (var (_, entity) in SystemAPI.Query<DestroyOnAudioCompleteTag>().WithEntityAccess())
             {
                 var audioSource = SystemAPI.ManagedAPI.GetComponent<AudioSource>(entity);
-                if (!audioSource.isPlaying)
-                {
-                    ecb.DestroyEntity(entity);
-                }
+                if (!audioSource.isPlaying) ecb.DestroyEntity(entity);
             }
         }
 

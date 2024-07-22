@@ -23,14 +23,10 @@ namespace Logic
             var actionAsset = SystemAPI.GetSingleton<InputComponent>().InputActions.Value;
             var bindingsPath = Path.Combine(Application.persistentDataPath, "Controls.json");
             if (File.Exists(bindingsPath))
-            {
                 actionAsset.LoadFromJson(File.ReadAllText(bindingsPath));
-            }
             else
-            {
                 File.WriteAllText(bindingsPath, actionAsset.ToJson());
-            }
-            
+
             _move = actionAsset.FindAction("Move");
             _jump = actionAsset.FindAction("Jump");
             _push = actionAsset.FindAction("Push");
@@ -67,7 +63,10 @@ namespace Logic
             inputComponent.PreviousLook = ReadButton(_previousLook, inputComponent.PreviousLook);
         }
 
-        private InputComponent.ButtonState ReadButton(InputAction action, InputComponent.ButtonState baseState=default)
+        private InputComponent.ButtonState ReadButton(
+            InputAction action,
+            InputComponent.ButtonState baseState = default
+        )
         {
             baseState.PressedThisFrame |= action.WasPressedThisFrame();
             baseState.CurrentlyPressed |= action.IsPressed();

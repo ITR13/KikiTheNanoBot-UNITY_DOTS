@@ -1,5 +1,5 @@
-﻿using Data;
-using Constants;
+﻿using Constants;
+using Data;
 using Unity.Burst;
 using Unity.Entities;
 using UnityEngine;
@@ -11,6 +11,7 @@ namespace Logic
     public partial struct GoalRenderSystem : ISystem
     {
         private ComponentType _goalType;
+
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<Goal>();

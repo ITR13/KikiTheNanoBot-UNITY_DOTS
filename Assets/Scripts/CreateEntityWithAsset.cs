@@ -7,7 +7,7 @@ public class CreateEntityWithAsset : MonoBehaviour
 {
     [SerializeField] private VariablesGroupAsset _asset;
 
-    void Start()
+    private void Start()
     {
         World.DefaultGameObjectInjectionWorld.EntityManager.CreateSingleton(
             new VariableHolder

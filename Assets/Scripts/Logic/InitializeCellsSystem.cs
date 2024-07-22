@@ -5,7 +5,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using static Data.BoundUtils;
 
 namespace Logic
@@ -96,7 +95,7 @@ namespace Logic
                     wireEntities[i],
                     new Wire
                     {
-                        Group = group
+                        Group = group,
                     }
                 );
             }

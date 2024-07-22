@@ -24,20 +24,21 @@ namespace Data
 
     public unsafe class RenderRateManager : IRateManager
     {
-        /// <summary>
-        /// Ignored
-        /// </summary>
-        public float Timestep { get; set; }
-
-        private double _lastElapsedTime;
         private bool _didPushTime;
 
+        private double _lastElapsedTime;
+
         /// <summary>
-        /// Double rewindable allocators to remember before pushing in rate group allocators.
+        ///     Double rewindable allocators to remember before pushing in rate group allocators.
         /// </summary>
         private DoubleRewindableAllocators* _oldGroupAllocators = null;
 
-        /// <inheritdoc cref="IRateManager.ShouldGroupUpdate"/>
+        /// <summary>
+        ///     Ignored
+        /// </summary>
+        public float Timestep { get; set; }
+
+        /// <inheritdoc cref="IRateManager.ShouldGroupUpdate" />
         public bool ShouldGroupUpdate(ComponentSystemGroup group)
         {
             // if this is true, means we're being called a second or later time in a loop
@@ -60,8 +61,8 @@ namespace Data
 
             group.World.PushTime(
                 new TimeData(
-                    elapsedTime: elapsedTime,
-                    deltaTime: deltaTime
+                    elapsedTime,
+                    deltaTime
                 )
             );
 

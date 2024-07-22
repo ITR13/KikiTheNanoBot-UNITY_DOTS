@@ -98,7 +98,7 @@ namespace Logic
                 new LoadedLevel
                 {
                     Entity = sceneEntity, CurrentLevelIndex = level, ExpectedMoves = levelData.ExpectedMoves,
-                    Name = levelData.LevelName
+                    Name = levelData.LevelName,
                 }
             );
         }

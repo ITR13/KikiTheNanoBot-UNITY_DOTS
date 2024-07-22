@@ -10,8 +10,6 @@ namespace Logic
     [WorldSystemFilter(WorldSystemFilterFlags.Presentation | WorldSystemFilterFlags.Editor)]
     public partial struct InitializeColorsSystem : ISystem
     {
-        private bool forceUpdate;
-        
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<RoomColors>();
