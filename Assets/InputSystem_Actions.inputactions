@@ -87,7 +87,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "<color=#FFFFFFFF><mark=#3169ACAB></mark>PreviousLook</color>",
+                    "name": "PreviousLook",
                     "type": "Button",
                     "id": "e4fb4d0b-9987-4ffd-a7c7-7887c8cf1c3d",
                     "expectedControlType": "",
@@ -489,7 +489,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "<color=#FFFFFFFF><mark=#3169ACAB></mark>PreviousLook</color>",
+                    "action": "PreviousLook",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
