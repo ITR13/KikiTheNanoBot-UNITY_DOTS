@@ -27,20 +27,32 @@ namespace Logic
             else
                 File.WriteAllText(bindingsPath, actionAsset.ToJson());
 
-            _move = actionAsset.FindAction("Move");
-            _jump = actionAsset.FindAction("Jump");
-            _push = actionAsset.FindAction("Push");
-            _shoot = actionAsset.FindAction("Shoot");
-            _look = actionAsset.FindAction("Look");
+            _move = FindAction("Move");
+            _jump = FindAction("Jump");
+            _push = FindAction("Push");
+            _shoot = FindAction("Shoot");
+            _look = FindAction("Look");
 
-            _reset = actionAsset.FindAction("Reset");
-            _nextLevel = actionAsset.FindAction("NextLevel");
-            _previousLevel = actionAsset.FindAction("PreviousLevel");
+            _reset = FindAction("Reset");
+            _nextLevel = FindAction("NextLevel");
+            _previousLevel = FindAction("PreviousLevel");
 
-            _nextLook = actionAsset.FindAction("NextLook");
-            _previousLook = actionAsset.FindAction("PreviousLook");
+            _nextLook = FindAction("NextLook");
+            _previousLook = FindAction("PreviousLook");
 
             actionAsset.FindActionMap("Player").Enable();
+            return;
+
+            InputAction FindAction(string actionName)
+            {
+                var action = actionAsset.FindAction(actionName);
+                if (action == null)
+                {
+                    Debug.LogError($"Failed to find action {actionName}");
+                }
+
+                return action;
+            }
         }
 
         protected override void OnUpdate()
@@ -68,6 +80,11 @@ namespace Logic
             InputComponent.ButtonState baseState = default
         )
         {
+            if (action == null)
+            {
+                return baseState;
+            }
+
             baseState.PressedThisFrame |= action.WasPressedThisFrame();
             baseState.CurrentlyPressed |= action.IsPressed();
             baseState.ReleasedThisFrame |= action.WasReleasedThisFrame();
